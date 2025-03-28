@@ -48,6 +48,7 @@ void			ft_putchar_fd(char c, int fd);
 void			ft_putstr_fd(char *s, int fd);
 void			ft_putendl_fd(char *s, int fd);
 void			ft_putnbr_fd(int n, int fd);
+char			ft_peek(const char *buffer, int pos);
 
 char			*ft_substr(const char *s, unsigned int start, size_t len);
 char			*ft_strdup(const char *s1);
@@ -59,6 +60,7 @@ char			*ft_strmapi(const char *s, char (*f)(unsigned int, char));
 char			*ft_strnstr(const char *str, const char *to_find, size_t len);
 char			*ft_strchr(const char *str, int n);
 char			*ft_strrchr(const char *str, int n);
+char			*ft_strtok(char *str, const char *delim);
 
 typedef struct s_list
 {

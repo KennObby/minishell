@@ -27,4 +27,46 @@
 
 //< ----------------------- STRUCTS --------------------- >
 
-# endif
+/*
+ * CMD = a simple command like cd 
+ * PIPE = |
+ * SEMICOLON = ;
+ * LOGICAL_AND = &&
+ * LOGICAL_OR = ||
+ * REDIRECT_IN = <
+ * REDIRECT_OUT = >
+ * APPEND = >>
+ * HEREDOC = <<
+ * GROUPING = ( )
+ *
+ */
+
+typedef enum e_type
+{
+	CMD,
+	PIPE,
+	SEMICOLON,
+	LOGICAL_AND,
+	LOGICAL_OR,
+	REDIRECT_IN,
+	REDIRECT_OUT,
+	APPEND,
+	HEREDOC,
+	GROUPING,
+}				t_type;
+
+/*
+ * type = type tokenized in a node
+ * args = args
+ * writer = left child => output provider. related STDOUT_FILENO
+ * reader = right child => input provider. related STDIN_FILENO
+ */
+typedef struct s_node
+{
+	t_type			type;
+	char			**args;
+	struct s_node	*writer;
+	struct s_node	*reader;
+}				t_node;
+
+#endif

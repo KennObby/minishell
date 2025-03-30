@@ -1,7 +1,14 @@
 LIBFT_DIR = Libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
-SRCS = src/main.c
+SRCS =  src/binary_tree/bt_parser.c				\
+		src/binary_tree/bt_parser_utils.c 		\
+		src/binary_tree/token.c 				\
+		src/binary_tree/init_tree.c 			\
+		src/binary_tree/free_tree.c 			\
+		src/binary_tree/to_str_helper.c 		\
+		src/binary_tree/main.c
+
 OBJS = $(SRCS:.c=.o)
 
 CC = cc

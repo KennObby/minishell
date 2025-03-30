@@ -1,24 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   ft_isspace.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: oilyine- <oleg.ilyine@student42.luxembour  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/28 21:27:25 by oilyine-          #+#    #+#             */
-/*   Updated: 2025/03/28 23:06:32 by oilyine-         ###   ########.fr       */
+/*   Created: 2025/03/30 12:10:05 by oilyine-          #+#    #+#             */
+/*   Updated: 2025/03/30 12:13:14 by oilyine-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/minishell.h"
-#include <readline/readline.h>
-#include "../Libft/ft_printf.h"
+#include "libft.h"
 
-int	main(void)
+int	ft_isspace(int c)
 {
-	char	*rl;
-
-	rl = readline("Prompt > ");
-	ft_printf("%s\n", rl);
-	return (0);
+	return (c == ' ' || c == '\t' || c == '\n'
+		|| c == '\r' || c == '\v' || c == '\f');
 }

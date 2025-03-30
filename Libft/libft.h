@@ -26,6 +26,7 @@ int				ft_isalpha(int c);
 int				ft_isascii(int c);
 int				ft_isdigit(int n);
 int				ft_isprint(int c);
+int				ft_isspace(int c);
 int				ft_strcmp(const char s1, const char *s2);
 int				ft_strncmp(const char *src, const char *dest, size_t length);
 int				ft_toupper(int c);
@@ -49,6 +50,7 @@ void			ft_putchar_fd(char c, int fd);
 void			ft_putstr_fd(char *s, int fd);
 void			ft_putendl_fd(char *s, int fd);
 void			ft_putnbr_fd(int n, int fd);
+void			*ft_realloc(void *ptr, size_t old_size, size_t new_size);
 char			ft_peek(const char *buffer, int pos);
 
 char			*ft_substr(const char *s, unsigned int start, size_t len);

@@ -27,8 +27,9 @@
 
 //< ----------------------- STRUCTS --------------------- >
 
-/*
- * CMD = a simple command like cd 
+/* 
+ * CMD = combination of node like `echo "Hi"` -> args = ["echo", "Hi"];
+ * WORD = tokens took in a CMD sequence like a catch-all non operations
  * PIPE = |
  * SEMICOLON = ;
  * LOGICAL_AND = &&
@@ -38,12 +39,14 @@
  * APPEND = >>
  * HEREDOC = <<
  * GROUPING = ( )
+ * GROUPING_OPEN = opened parenthesis "(" (opener)
+ * GROUPING_CLOSE = closed parenthesis ")" (closer)
  * END = end of token ? Not sure to be how to implement it but lets try
  */
-
 typedef enum e_type
 {
 	CMD,
+	WORD,
 	PIPE,
 	SEMICOLON,
 	LOGICAL_AND,
@@ -53,6 +56,8 @@ typedef enum e_type
 	APPEND,
 	HEREDOC,
 	GROUPING,
+	GROUPING_OPEN,
+	GROUPING_CLOSE,
 	END,
 }				t_type;
 
@@ -68,8 +73,27 @@ typedef struct s_token
 }				t_token;
 
 /*
- * type = type tokenized in a node
- * args = args
+ * binary tree parser, identifying nodes by recursively trying to follow 
+ * precedence POSIX bash operators (e.g "|", "<<", etc...)
+ *
+ */
+typedef struct s_parser
+{
+	t_token	*tokens;
+	int		pos;
+}				t_parser;
+
+typedef struct s_redir
+{
+	t_type	type;
+	char	*filename;
+}				t_redir;
+
+/*
+ * DOCS: https://www.geeksforgeeks.org/binary-tree-in-c/ 
+ *
+ * type = type tokenized in a node, ref. to operation type
+ * args = args in prompt
  * writer = left child => output provider. related STDOUT_FILENO
  * reader = right child => input provider. related STDIN_FILENO
  */
@@ -77,10 +101,47 @@ typedef struct s_node
 {
 	t_type			type;
 	char			**args;
+	t_redir			*redirs;
+	int				redir_count;
 	struct s_node	*writer;
 	struct s_node	*reader;
 }				t_node;
 
-# define MAX_TOKENS 256
+# define MAX_TOKENS 1024
+# define MAX_ARGS 1024
+
+//< --------------------------- FUNCTIONS -------------------- >
+//
+//< --------------------------- init_tree.c ---------------- >
+t_node		*create_leaf(char **args);
+t_node		*create_node(t_type type, t_node *left, t_node *right);
+
+//< --------------------------- bt_parser_utils.c ------------ >
+t_type		peek(t_parser *parser);
+void		consume(t_parser *parser);
+int			is_redirection(t_type type);
+t_node		*parse(t_parser *parser);
+
+//< --------------------------- bt_parser.c ------------------ >
+t_node		*parse_semicolon(t_parser *parser);
+t_node		*parse_logical(t_parser *parser);
+void		parse_redirects(t_parser *parser, t_node *cmd_node);
+t_node		*parse_pipeline(t_parser *parser);
+t_node		*parse_command(t_parser *parser);
+t_node		*parse_grouping(t_parser *parser);
+
+//< --------------------------- token.c ----------------------- >
+t_token		*tokenize(char *input);
+
+//< --------------------------- free_tree.c ------------------- >
+void		free_tree(t_node *node);
+void		free_tokens(t_token *tokens);
+
+//< --------------------------- main.c ------------------------ >
+void		print_tree(t_node *node, int depth);
+
+//< --------------------------- to_str_helper.c --------------- >
+const char	*redir_type_str(t_type type);
+const char	*type_to_str(t_type type);
 
 #endif

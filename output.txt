@@ -1,7 +1,0 @@
-drwxr-xr-x b_water b_water 4.0 KB Tue Mar 25 09:42:55 2025 builtins
-drwxr-xr-x b_water b_water 4.0 KB Sun Mar 30 21:45:20 2025 inc
-drwxr-xr-x b_water b_water 4.0 KB Sun Mar 30 23:51:52 2025 Libft
-.rw-r--r-- b_water b_water 878 B  Sun Mar 30 20:58:45 2025 Makefile
-.rwxr-xr-x b_water b_water  22 KB Sun Mar 30 23:51:52 2025 minishell
-.rw-r--r-- b_water b_water   0 B  Sun Mar 30 23:52:25 2025 output.txt
-drwxr-xr-x b_water b_water 4.0 KB Sun Mar 30 19:42:41 2025 src

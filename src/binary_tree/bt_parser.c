@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   bt_parser.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: oilyine- <oleg.ilyine@student42.luxembour  +#+  +:+       +#+        */
+/*   By: oilyine- <oleg.ilyine@student42.luxembo    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 13:04:50 by oilyine-          #+#    #+#             */
-/*   Updated: 2025/03/30 19:44:04 by oilyine-         ###   ########.fr       */
+/*   Updated: 2025/03/30 22:40:33 by oilyine-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ t_node	*parse_semicolon(t_parser *parser)
 	}
 	return (left);
 }
+
 t_node	*parse_logical(t_parser *parser)
 {
 	t_node	*left;
@@ -57,6 +58,7 @@ t_node	*parse_pipeline(t_parser *parser)
 	}
 	return (left);
 }
+
 /*
  * 1. Collecting commands by allocating based on MAX_ARGS size
  * 2. Collecitng tokens until an operator is found
@@ -72,7 +74,7 @@ t_node	*parse_command(t_parser *parser)
 	args = malloc(MAX_ARGS * sizeof(char *));
 	arg_count = 0;
 	while (parser->pos < MAX_TOKENS
-		&& parser->tokens[parser->pos].type == CMD)
+		&& parser->tokens[parser->pos].type == WORD)
 	{
 		args[arg_count++] = ft_strdup(parser->tokens[parser->pos].value);
 		parser->pos++;
@@ -98,10 +100,11 @@ void	parse_redirects(t_parser *parser, t_node *cmd_node)
 	{
 		redir.type = parser->tokens[parser->pos].type;
 		parser->pos++;
-		if (peek(parser) != CMD)
+		if (parser->pos >= MAX_TOKENS || peek(parser) != WORD)
 		{
 			free_tree(cmd_node);
 			ft_printf("Missing filename for redirection");
+			return ;
 		}
 		redir.filename = ft_strdup(parser->tokens[parser->pos].value);
 		parser->pos++;

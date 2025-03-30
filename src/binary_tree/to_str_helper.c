@@ -19,7 +19,7 @@ const char	*redir_type_str(t_type type)
 		case REDIRECT_IN:	return ("<");
 		case REDIRECT_OUT: 	return (">");
 		case APPEND:		return (">>");
-		case HEREDOC:		return (">>");
+		case HEREDOC:		return ("<<");
 		default:			return ("UNKNOWN REDIR");
 	}
 }

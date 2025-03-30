@@ -14,7 +14,8 @@
 
 static int	is_operator(char c)
 {
-	return (c == '>' || c == '<' || c == ';' || c == '&');
+	return (c == '>' || c == '<' || c == ';'
+		|| c == '&' || c == '(' || c == ')');
 }
 
 /*
@@ -46,37 +47,47 @@ t_token	*tokenize(char *input)
 		}
 		else if (ft_strncmp(&input[pos], "<<", 2) == 0)
 		{
-			tokens[++i] = (t_token){HEREDOC, ft_strdup("<<")};
+			tokens[i++] = (t_token){HEREDOC, ft_strdup("<<")};
 			pos += 2;
 		}
 		else if (ft_strncmp(&input[pos], "&&", 2) == 0)
 		{
-			tokens[++i] = (t_token){LOGICAL_AND, ft_strdup("&&")};
+			tokens[i++] = (t_token){LOGICAL_AND, ft_strdup("&&")};
 			pos += 2;
 		}
 		else if (ft_strncmp(&input[pos], "||", 2) == 0)
 		{
-			tokens[++i] = (t_token){LOGICAL_OR, ft_strdup("||")};
+			tokens[i++] = (t_token){LOGICAL_OR, ft_strdup("||")};
 			pos += 2;
 		}
 		else if (input[pos] == '>')
 		{
-			tokens[++i] = (t_token){REDIRECT_OUT, ft_strdup(">")};
+			tokens[i++] = (t_token){REDIRECT_OUT, ft_strdup(">")};
 			pos++;
 		}
 		else if (input[pos] == '<')
 		{
-			tokens[++i] = (t_token){REDIRECT_IN, ft_strdup("<")};
+			tokens[i++] = (t_token){REDIRECT_IN, ft_strdup("<")};
 			pos++;
 		}
 		else if (input[pos] == '|')
 		{
-			tokens[++i] = (t_token){PIPE, ft_strdup("|")};
+			tokens[i++] = (t_token){PIPE, ft_strdup("|")};
 			pos++;
 		}
 		else if (input[pos] == ';')
 		{
-			tokens[++i] = (t_token){SEMICOLON, ft_strdup("")};
+			tokens[i++] = (t_token){SEMICOLON, ft_strdup("")};
+			pos++;
+		}
+		else if (input[pos] == '(')
+		{
+			tokens[i++] = (t_token){GROUPING_OPEN, ft_strdup("(")};
+			pos++;
+		}
+		else if (input[pos] == ')')
+		{
+			tokens[i++] = (t_token){GROUPING_CLOSE, ft_strdup(")")};
 			pos++;
 		}
 		else

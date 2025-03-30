@@ -1,0 +1,8 @@
+CompilerFlags:
+    Add:
+     - -I./include
+     - -I./src
+
+HeaderInsertion:
+    IncludeBlocks: Never
+    Style: None

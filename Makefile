@@ -1,14 +1,14 @@
 LIBFT_DIR = Libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
-SRCS = src/test.c \
+SRCS = src/main.c
 OBJS = $(SRCS:.c=.o)
 
 CC = cc
 CFLAGS = -Wall -Wextra -Werror 
 
 INC = -I inc/ -I $(LIBFT_DIR) 
-LDFLAGS = -L $(LIBFT_DIR) -lreadline -lft
+LDFLAGS = -L $(LIBFT_DIR) -L /usr/local/lib -lreadline -lft
 
 NAME = minishell
 RM = rm -rf
@@ -19,9 +19,11 @@ $(LIBFT):
 		@make -C $(LIBFT_DIR)
 
 $(NAME): $(OBJS) $(LIBFT)
-		@$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
+		@echo "Compiling $@..."
+		@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) $(LDFLAGS)
 
 %.o: %.c
+		@echo "Compiling $@..."
 		@$(CC) $(CFLAGS) $(INC) -c $< -o $@
 
 clean:

@@ -11,4 +11,14 @@
 /* ************************************************************************** */
 
 #include "../inc/minishell.h"
-#include <stdio.h>
+#include <readline/readline.h>
+#include "../Libft/ft_printf.h"
+
+int	main(void)
+{
+	char	*rl;
+
+	rl = readline("Prompt > ");
+	ft_printf("%s\n", rl);
+	return (0);
+}

@@ -38,7 +38,7 @@
  * APPEND = >>
  * HEREDOC = <<
  * GROUPING = ( )
- *
+ * END = end of token ? Not sure to be how to implement it but lets try
  */
 
 typedef enum e_type
@@ -53,7 +53,19 @@ typedef enum e_type
 	APPEND,
 	HEREDOC,
 	GROUPING,
+	END,
 }				t_type;
+
+/*
+ * type = enum t_type
+ * value = The actual string (e.g., "ls", "|")
+ *
+ */
+typedef struct s_token
+{
+	t_type	type;
+	char	*value;
+}				t_token;
 
 /*
  * type = type tokenized in a node
@@ -68,5 +80,7 @@ typedef struct s_node
 	struct s_node	*writer;
 	struct s_node	*reader;
 }				t_node;
+
+# define MAX_TOKENS 256
 
 #endif

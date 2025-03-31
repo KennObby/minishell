@@ -62,8 +62,7 @@ int	main(void)
 	t_parser	parser;
 	t_node		*ast;
 
-	rl = readline("minishell> ");
-	while (rl != NULL)
+	while ((rl = readline("minishell> ")) != NULL)
 	{
 		if (ft_strlen(rl) > 0)
 			add_history(rl);
@@ -76,5 +75,8 @@ int	main(void)
 		free_tokens(tokens);
 		free(rl);
 	}
+	//free_tree(ast);
+	//free_tokens(tokens);
+	//free(rl);
 	return (0);
 }

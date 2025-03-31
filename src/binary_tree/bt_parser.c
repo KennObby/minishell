@@ -104,6 +104,7 @@ void	parse_redirects(t_parser *parser, t_node *cmd_node)
 		{
 			free_tree(cmd_node);
 			ft_printf("Missing filename for redirection");
+			parser->pos = MAX_TOKENS;
 			return ;
 		}
 		redir.filename = ft_strdup(parser->tokens[parser->pos].value);
@@ -130,7 +131,11 @@ t_node	*parse_grouping(t_parser *parser)
 		consume(parser);
 		subtree = parse_semicolon(parser);
 		if (peek(parser) != GROUPING_CLOSE)
+		{
 			ft_printf("Syntax error: unclosed grouping");
+			parser->pos = MAX_TOKENS;
+			return (NULL);
+		}
 		consume(parser);
 		return (subtree);
 	}

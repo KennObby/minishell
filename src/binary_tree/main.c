@@ -71,6 +71,7 @@ int	main(void)
 		parser = (t_parser){tokens, 0};
 		ast = parse(&parser);
 		print_tree(ast, 0);
+		//execute(ast);
 		free_tree(ast);
 		free_tokens(tokens);
 		free(rl);

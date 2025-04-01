@@ -21,6 +21,7 @@
 # include <readline/readline.h>
 # include <readline/history.h>
 # include <signal.h>
+# include <sys/wait.h>
 # include "../Libft/libft.h"
 # include "../Libft/ft_printf.h"
 # include "../Libft/get_next_line_bonus.h"
@@ -143,5 +144,16 @@ void		print_tree(t_node *node, int depth);
 //< --------------------------- to_str_helper.c --------------- >
 const char	*redir_type_str(t_type type);
 const char	*type_to_str(t_type type);
+
+//< --------------------------- exec_ops.c -------------------- >
+void		execute_cmd(t_node *cmd);
+void		execute_pipe(t_node *pipe_node);
+void		execute_logical(t_node *logical_node);
+void		execute_semicolon(t_node *semi_node);
+int			handle_redirections(t_node *cmd);
+
+//< --------------------------- exec_mgmt.c ------------------- >
+void		execute(t_node *node);
+int			handle_heredoc(char *delimiter);
 
 #endif

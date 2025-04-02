@@ -12,17 +12,28 @@
 
 #include "../../inc/minishell.h"
 
-void	execute_cmd(t_node *cmd)
+void	execute_cmd(t_node *cmd, t_env *env_list)
 {
-	pid_t	pid;
+	char	*cmd_path;
+	char	**envp;
 	int		status;
+	pid_t	pid;
 
 	if (handle_redirections(cmd) != 0)
 		return ;
+	cmd_path = resolve_path(cmd->args[0], env_list);
+	if (!cmd_path)
+	{
+		ft_printf("minishell: command not found: %s\n", cmd->args[0]);
+		return ;
+	}
+	if (is_builtin(cmd->args[0]))
+		exec_builtin(cmd, env_list);
 	pid = fork();
 	if (pid == 0)
 	{
-		if (execvp(cmd->args[0], cmd->args) == -1)
+		envp = env_list_to_array(env_list);
+		if (execve(cmd_path, cmd->args, envp) == -1)
 		{
 			perror("minishell");
 			exit(EXIT_FAILURE);
@@ -34,7 +45,7 @@ void	execute_cmd(t_node *cmd)
 		waitpid(pid, &status, 0);
 }
 
-void	execute_pipe(t_node *pipe_node)
+void	execute_pipe(t_node *pipe_node, t_env *env)
 {
 	int		fd[2];
 	pid_t	pid_left;
@@ -50,7 +61,7 @@ void	execute_pipe(t_node *pipe_node)
 	{
 		close(fd[0]);
 		dup2(fd[1], STDOUT_FILENO);
-		execute(pipe_node->writer);
+		execute(pipe_node->writer, env);
 		close(fd[1]);
 		exit(EXIT_SUCCESS);
 	}
@@ -59,7 +70,7 @@ void	execute_pipe(t_node *pipe_node)
 	{
 		close(fd[1]);
 		dup2(fd[0], STDIN_FILENO);
-		execute(pipe_node->reader);
+		execute(pipe_node->reader, env);
 		close(fd[0]);
 		exit(EXIT_SUCCESS);
 	}
@@ -73,24 +84,24 @@ void	execute_pipe(t_node *pipe_node)
  * 		Si c'est le cas, le code sera a repenser voir les recreer
  * https://sites.uclouvain.be/SystInfo/usr/include/bits/waitstatus.h.html
  */
-void	execute_logical(t_node *logical_node)
+void	execute_logical(t_node *logical_node, t_env *env)
 {
-	int	status;
+	int		status;
 
-	execute(logical_node->writer);
+	execute(logical_node->writer, env);
 	wait(&status);
 	if (logical_node->type == LOGICAL_AND && WIFEXITED(status)
 		&& WEXITSTATUS(status) == 0)
-		execute(logical_node->reader);
+		execute(logical_node->reader, env);
 	else if (logical_node->type == LOGICAL_OR && WIFEXITED(status)
 		&& WEXITSTATUS(status) != 0)
-		execute(logical_node->reader);
+		execute(logical_node->reader, env);
 }
 
-void	execute_semicolon(t_node *semi_node)
+void	execute_semicolon(t_node *semi_node, t_env *env)
 {
-	execute(semi_node->writer);
-	execute(semi_node->reader);
+	execute(semi_node->writer, env);
+	execute(semi_node->reader, env);
 }
 
 int	handle_redirections(t_node *cmd)

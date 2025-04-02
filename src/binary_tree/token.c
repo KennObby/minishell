@@ -12,7 +12,7 @@
 
 #include "../../inc/minishell.h"
 
-static int	is_operator(char c)
+int	is_operator(char c)
 {
 	return (c == '>' || c == '<' || c == ';'
 		|| c == '&' || c == '(' || c == ')');

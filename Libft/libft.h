@@ -54,6 +54,8 @@ void			*ft_realloc(void *ptr, size_t old_size, size_t new_size);
 char			ft_peek(const char *buffer, int pos);
 
 char			*ft_substr(const char *s, unsigned int start, size_t len);
+char			*ft_strcat(char *dest, const char *src);
+char			*ft_strcpy(char *dest, const char *src);
 char			*ft_strdup(const char *s1);
 char			*ft_strjoin(const char *s1, const char *s2);
 char			*ft_strtrim(const char *s1, const char *set);

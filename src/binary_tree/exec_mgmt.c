@@ -12,18 +12,18 @@
 
 #include "../../inc/minishell.h"
 
-void	execute(t_node *node)
+void	execute(t_node *node, t_env *env)
 {
 	if (!node)
 		return ;
 	if (node->type == CMD)
-		execute_cmd(node);
+		execute_cmd(node, env);
 	if (node->type == PIPE)
-		execute_pipe(node);
+		execute_pipe(node, env);
 	if (node->type == SEMICOLON)
-		execute_semicolon(node);
+		execute_semicolon(node, env);
 	if (node->type == LOGICAL_AND || node->type == LOGICAL_OR)
-		execute_logical(node);
+		execute_logical(node, env);
 }
 
 int	handle_heredoc(char *delimiter)

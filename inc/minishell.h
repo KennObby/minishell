@@ -90,6 +90,13 @@ typedef struct s_redir
 	char	*filename;
 }				t_redir;
 
+typedef struct s_env
+{
+	char			*key;
+	char			*value;
+	struct s_env	*next;
+}				t_env;
+
 /*
  * DOCS: https://www.geeksforgeeks.org/binary-tree-in-c/ 
  *
@@ -111,19 +118,20 @@ typedef struct s_node
 # define MAX_TOKENS 1024
 # define MAX_ARGS 1024
 
-//< --------------------------- FUNCTIONS -------------------- >
+//< --------------------------- FUNCTIONS --------------------- >
 //
-//< --------------------------- init_tree.c ---------------- >
+//< --------------------------- BINARY TREE ------------------- >
+//< --------------------------- init_tree.c ------------------- >
 t_node		*create_leaf(char **args);
 t_node		*create_node(t_type type, t_node *left, t_node *right);
 
-//< --------------------------- bt_parser_utils.c ------------ >
+//< --------------------------- bt_parser_utils.c ------------- >
 t_type		peek(t_parser *parser);
 void		consume(t_parser *parser);
 int			is_redirection(t_type type);
 t_node		*parse(t_parser *parser);
 
-//< --------------------------- bt_parser.c ------------------ >
+//< --------------------------- bt_parser.c ------------------- >
 t_node		*parse_semicolon(t_parser *parser);
 t_node		*parse_logical(t_parser *parser);
 void		parse_redirects(t_parser *parser, t_node *cmd_node);
@@ -132,6 +140,7 @@ t_node		*parse_command(t_parser *parser);
 t_node		*parse_grouping(t_parser *parser);
 
 //< --------------------------- token.c ----------------------- >
+int			is_operator(char c);
 t_token		*tokenize(char *input);
 
 //< --------------------------- free_tree.c ------------------- >
@@ -146,14 +155,35 @@ const char	*redir_type_str(t_type type);
 const char	*type_to_str(t_type type);
 
 //< --------------------------- exec_ops.c -------------------- >
-void		execute_cmd(t_node *cmd);
-void		execute_pipe(t_node *pipe_node);
-void		execute_logical(t_node *logical_node);
-void		execute_semicolon(t_node *semi_node);
+void		execute_cmd(t_node *cmd, t_env *env_list);
+void		execute_pipe(t_node *pipe_node, t_env *env);
+void		execute_logical(t_node *logical_node, t_env *env);
+void		execute_semicolon(t_node *semi_node, t_env *env);
 int			handle_redirections(t_node *cmd);
 
 //< --------------------------- exec_mgmt.c ------------------- >
-void		execute(t_node *node);
+void		execute(t_node *node, t_env *env);
 int			handle_heredoc(char *delimiter);
+
+//< --------------------------- env_mgmt.c -------------------- >
+t_env		*init_env_list(char **envp);
+t_env		*add_to_env_list(t_env *list, char *env_line);
+char		*get_env_value(t_env *env, char *key);
+char		*resolve_path(char *cmd, t_env *env);
+
+//< --------------------------- env_init.c -------------------- >
+t_env		*init_env_list(char **envp);
+char		**env_list_to_array(t_env *env);
+
+//< --------------------------- free_env.c -------------------- >
+void		free_env_list(t_env *env);
+void		free_str_array(char **paths);
+
+//< --------------------------- builtin_utils.c --------------- >
+int			is_builtin(char *cmd);
+
+//< --------------------------- builltin_mgmt.c --------------- >
+void		builtin_env(t_env *env);
+void		exec_builtin(t_node *cmd, t_env *env);
 
 #endif

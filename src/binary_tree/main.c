@@ -54,14 +54,21 @@ void	print_tree(t_node *node, int depth)
 }
 /*
  * ast = https://deepsource.com/glossary/ast 
+ * environment variables tried to be managed (char **envp)
+ * !! -> Maybe considering to add env_list in s_env struct
+ *
  */
-int	main(void)
+int	main(int ac, char **av, char **envp)
 {
 	char		*rl;
 	t_token		*tokens;
 	t_parser	parser;
 	t_node		*ast;
+	t_env		*env_list;
 
+	(void)ac;
+	(void)av;
+	env_list = init_env_list(envp);
 	while ((rl = readline("minishell> ")) != NULL)
 	{
 		if (ft_strlen(rl) > 0)
@@ -71,13 +78,11 @@ int	main(void)
 		parser = (t_parser){tokens, 0};
 		ast = parse(&parser);
 		print_tree(ast, 0);
-		//execute(ast);
+		execute(ast, env_list);
 		free_tree(ast);
 		free_tokens(tokens);
 		free(rl);
 	}
-	//free_tree(ast);
-	//free_tokens(tokens);
-	//free(rl);
+	free_env_list(env_list);
 	return (0);
 }

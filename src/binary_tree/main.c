@@ -77,7 +77,7 @@ int	main(int ac, char **av, char **envp)
 		tokens = tokenize(rl);
 		parser = (t_parser){tokens, 0};
 		ast = parse(&parser);
-		print_tree(ast, 0);
+		//print_tree(ast, 0);
 		execute(ast, env_list);
 		free_tree(ast);
 		free_tokens(tokens);

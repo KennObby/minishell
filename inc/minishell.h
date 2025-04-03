@@ -90,6 +90,10 @@ typedef struct s_redir
 	char	*filename;
 }				t_redir;
 
+/*
+ *
+ *
+ */
 typedef struct s_env
 {
 	char			*key;

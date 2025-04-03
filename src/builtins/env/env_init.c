@@ -41,11 +41,12 @@ char	**env_list_to_array(t_env *env)
 	tmp = env;
 	while (tmp)
 	{
-		arr[i++] = malloc(ft_strlen(tmp->key) + ft_strlen(tmp->value) + 2);
+		arr[i] = malloc(ft_strlen(tmp->key) + ft_strlen(tmp->value) + 2);
 		ft_strcpy(arr[i], tmp->key);
 		ft_strcat(arr[i], "=");
 		ft_strcat(arr[i], tmp->value);
 		tmp = tmp->next;
+		i++;
 	}
 	arr[i] = NULL;
 	return (arr);

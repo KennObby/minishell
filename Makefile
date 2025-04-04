@@ -13,6 +13,7 @@ SRCS =  src/binary_tree/bt_parser.c				\
 		src/builtins/env/env_mgmt.c 			\
 		src/builtins/env/env_init.c 			\
 		src/builtins/env/free_env.c 			\
+		src/builtins/pwd/pwd.c 					\
 		src/binary_tree/main.c
 
 OBJS = $(SRCS:.c=.o)

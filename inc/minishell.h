@@ -18,10 +18,16 @@
 # include <stdint.h>
 # include <stdarg.h>
 # include <stdlib.h>
+# include <unistd.h>
 # include <readline/readline.h>
 # include <readline/history.h>
 # include <signal.h>
 # include <sys/wait.h>
+# include <sys/stat.h>
+# include <sys/types.h>
+# include <sys/ioctl.h>
+# include <dirent.h>
+# include <termios.h>
 # include "../Libft/libft.h"
 # include "../Libft/ft_printf.h"
 # include "../Libft/get_next_line_bonus.h"
@@ -91,7 +97,9 @@ typedef struct s_redir
 }				t_redir;
 
 /*
- *
+ * key = environment variable name
+ * value = file path dedicated to the key 
+ * env => "key=value"
  *
  */
 typedef struct s_env
@@ -100,6 +108,21 @@ typedef struct s_env
 	char			*value;
 	struct s_env	*next;
 }				t_env;
+
+/* 
+ * In case we need to update PWD (pwd) and OLDPWD (called by cd -)
+ * We will probably need to use struct for pwd in the builtin_pwd() function
+ * Otherwise, no need to use it 
+ * cwd = current working directory
+ * cwd_size =  size of cwd -> ref to PATH_MAX macro in limits.h
+ *
+ * typedef struct s_pwd
+ *{
+ *	char	*cwd;
+ *	long	cwd_size;
+ *}				t_pwd;
+ *
+ */ 
 
 /*
  * DOCS: https://www.geeksforgeeks.org/binary-tree-in-c/ 
@@ -119,9 +142,13 @@ typedef struct s_node
 	struct s_node	*reader;
 }				t_node;
 
+/*
+ * MAX_PATH related to PATH_MAX on <linux/limits.h> macro value
+ * DOCS:https://stackoverflow.com/questions/9449241/where-is-path-max-defined-in-linux 
+ */
 # define MAX_TOKENS 1024
 # define MAX_ARGS 1024
-
+# define MAX_PATH 4096
 //< --------------------------- FUNCTIONS --------------------- >
 //
 //< --------------------------- BINARY TREE ------------------- >
@@ -169,6 +196,7 @@ int			handle_redirections(t_node *cmd);
 void		execute(t_node *node, t_env *env);
 int			handle_heredoc(char *delimiter);
 
+//< --------------------------- BUILT-INS --------------------- >
 //< --------------------------- env_mgmt.c -------------------- >
 t_env		*init_env_list(char **envp);
 t_env		*add_to_env_list(t_env *list, char *env_line);
@@ -182,6 +210,9 @@ char		**env_list_to_array(t_env *env);
 //< --------------------------- free_env.c -------------------- >
 void		free_env_list(t_env *env);
 void		free_str_array(char **paths);
+
+//< --------------------------- pwd.c ------------------------- >
+void		builtin_pwd(void);
 
 //< --------------------------- builtin_utils.c --------------- >
 int			is_builtin(char *cmd);

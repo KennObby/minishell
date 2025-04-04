@@ -34,4 +34,6 @@ void	exec_builtin(t_node *cmd, t_env *env)
 {
 	if (!ft_strcmp(cmd->args[0], "env"))
 		builtin_env(env);
+	if (!ft_strcmp(cmd->args[0], "pwd"))
+		builtin_pwd();
 }

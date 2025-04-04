@@ -28,7 +28,10 @@ void	execute_cmd(t_node *cmd, t_env *env_list)
 		return ;
 	}
 	if (is_builtin(cmd->args[0]))
+	{
 		exec_builtin(cmd, env_list);
+		return ;
+	}
 	pid = fork();
 	if (pid == 0)
 	{
@@ -81,7 +84,7 @@ void	execute_pipe(t_node *pipe_node, t_env *env)
 }
 
 /* DOCS : WIFEXITED && WEXITSTATUS-> A voir si macros interdites...
- * 		Si c'est le cas, le code sera a repenser voir les recreer
+ * 		Si c'est le cas, le code sera a repenser voir recreer ces macros
  * https://sites.uclouvain.be/SystInfo/usr/include/bits/waitstatus.h.html
  */
 void	execute_logical(t_node *logical_node, t_env *env)

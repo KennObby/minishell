@@ -27,6 +27,32 @@ t_env	*add_to_env_list(t_env *list, char *env_line)
 	return (new);
 }
 
+void	update_or_add_env(t_env **env, const char *key, const char *value)
+{
+	t_env	*curr;
+	char	*combined;
+
+	curr = *env;
+	while (curr)
+	{
+		if (ft_strcmp(curr->key, key) == 0)
+		{
+			free(curr->value);
+			curr->value = ft_strdup(value);
+			return ;
+		}
+		curr = curr->next;
+	}
+	combined = malloc(ft_strlen(key) + ft_strlen(value) + 2);
+	if (!combined)
+		return ;
+	ft_strcpy(combined, key);
+	ft_strcat(combined, "=");
+	ft_strcat(combined, value);
+	*env = add_to_env_list(*env, combined);
+	free(combined);
+}
+
 char	*resolve_path(char *cmd, t_env *env)
 {
 	char	*path;
@@ -63,4 +89,22 @@ char	*get_env_value(t_env *env, char *key)
 		env = env->next;
 	}
 	return (NULL);
+}
+
+void	bump_shlvl(t_env *env)
+{
+	char	*lvl_str;
+	char	*new_lvl_str;
+	int		lvl;
+
+	lvl_str = get_env_value(env, "SHLVL");
+	lvl = 0;
+	if (lvl_str)
+		lvl = ft_atoi(lvl_str);
+	lvl++;
+	new_lvl_str = ft_itoa(lvl);
+	if (!new_lvl_str)
+		return ;
+	update_or_add_env(&env, "SHLVL", new_lvl_str);
+	free(new_lvl_str);
 }

@@ -79,6 +79,7 @@ int	main(int ac, char **av, char **envp)
 		ast = parse(&parser);
 		//print_tree(ast, 0);
 		execute(ast, env_list);
+		bump_shlvl(env_list);
 		free_tree(ast);
 		free_tokens(tokens);
 		free(rl);

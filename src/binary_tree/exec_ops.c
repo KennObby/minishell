@@ -11,6 +11,8 @@
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
+#include <stdlib.h>
+#include <unistd.h>
 
 void	execute_cmd(t_node *cmd, t_env *env_list)
 {
@@ -21,26 +23,26 @@ void	execute_cmd(t_node *cmd, t_env *env_list)
 
 	if (handle_redirections(cmd) != 0)
 		return ;
-	cmd_path = resolve_path(cmd->args[0], env_list);
-	if (!cmd_path)
-	{
-		ft_printf("minishell: command not found: %s\n", cmd->args[0]);
-		return ;
-	}
-	if (is_builtin(cmd->args[0]))
-	{
-		exec_builtin(cmd, env_list);
-		return ;
-	}
 	pid = fork();
 	if (pid == 0)
 	{
 		envp = env_list_to_array(env_list);
-		if (execve(cmd_path, cmd->args, envp) == -1)
+		if (ft_strchr(cmd->args[0], '/'))
 		{
-			perror("minishell");
-			exit(EXIT_FAILURE);
+			if (access(cmd->args[0], X_OK) == 0)
+				execve(cmd->args[0], cmd->args, envp);
+			ft_printf("minishell: %s: command not found\n", cmd->args[0]);
+			exit(127);
 		}
+		cmd_path = resolve_path(cmd->args[0], env_list);
+		if (!cmd_path)
+		{
+			ft_printf("minishell: %s: command not found\n", cmd->args[0]);
+			exit(127);
+		}
+		execve(cmd_path, cmd->args, envp);
+		ft_printf("minishell: failed to exec: %s\n", cmd_path);
+		exit(1);
 	}
 	else if (pid < 0)
 		perror("minishell");

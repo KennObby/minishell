@@ -21,7 +21,7 @@ t_env	*init_env_list(char **envp)
 	env_list = NULL;
 	i = 0;
 	while (envp[i])
-		env_list = add_to_env_list(env_list, envp[i++]);
+		env_list = add_env_from_line(env_list, envp[i++]);
 	return (env_list);
 }
 

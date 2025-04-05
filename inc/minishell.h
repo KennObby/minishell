@@ -122,7 +122,7 @@ typedef struct s_env
  *	long	cwd_size;
  *}				t_pwd;
  *
- */ 
+ */
 
 /*
  * DOCS: https://www.geeksforgeeks.org/binary-tree-in-c/ 
@@ -198,7 +198,7 @@ int			handle_heredoc(char *delimiter);
 
 //< --------------------------- BUILT-INS --------------------- >
 //< --------------------------- env_mgmt.c -------------------- >
-t_env		*add_to_env_list(t_env *list, char *env_line);
+t_env		*add_env_from_line(t_env *list, char *env_line);
 char		*get_env_value(t_env *env, char *key);
 char		*resolve_path(char *cmd, t_env *env);
 void		update_or_add_env(t_env **env, const char *key, const char *value);

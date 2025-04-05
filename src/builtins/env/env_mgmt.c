@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-t_env	*add_to_env_list(t_env *list, char *env_line)
+t_env	*add_env_from_line(t_env *list, char *env_line)
 {
 	t_env	*new;
 	char	*eq;
@@ -49,7 +49,7 @@ void	update_or_add_env(t_env **env, const char *key, const char *value)
 	ft_strcpy(combined, key);
 	ft_strcat(combined, "=");
 	ft_strcat(combined, value);
-	*env = add_to_env_list(*env, combined);
+	*env = add_env_from_line(*env, combined);
 	free(combined);
 }
 

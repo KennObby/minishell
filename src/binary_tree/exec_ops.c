@@ -13,8 +13,11 @@
 #include "../../inc/minishell.h"
 #include <stdlib.h>
 #include <unistd.h>
-
-void	execute_cmd(t_node *cmd, t_env *env_list)
+/* DOCS : WIFEXITED && WEXITSTATUS-> A voir si macros interdites...
+ * 		Si c'est le cas, le code sera a repenser voir recreer ces macros
+ * https://sites.uclouvain.be/SystInfo/usr/include/bits/waitstatus.h.html
+ */
+int	execute_cmd(t_node *cmd, t_env *env_list)
 {
 	char	*cmd_path;
 	char	**envp;
@@ -22,7 +25,7 @@ void	execute_cmd(t_node *cmd, t_env *env_list)
 	pid_t	pid;
 
 	if (handle_redirections(cmd) != 0)
-		return ;
+		return (1);
 	pid = fork();
 	if (pid == 0)
 	{
@@ -45,68 +48,75 @@ void	execute_cmd(t_node *cmd, t_env *env_list)
 		exit(1);
 	}
 	else if (pid < 0)
+	{
 		perror("minishell");
+		return (1);
+	}
 	else
 		waitpid(pid, &status, 0);
+	ft_printf(">> executing command: %s\n", cmd->args[0]);
+	ft_printf(">> redir count: %d\n", cmd->redir_count);
+	if (WIFEXITED(status))
+		return (WEXITSTATUS(status));
+	else
+		return (1);
 }
 
-void	execute_pipe(t_node *pipe_node, t_env *env)
+int	execute_pipe(t_node *pipe_node, t_env *env)
 {
 	int		fd[2];
+	int		status;
 	pid_t	pid_left;
 	pid_t	pid_right;
 
+	status = 0;
 	if (pipe(fd) == -1)
 	{
 		perror("minishell");
-		return ;
+		return (1);
 	}
 	pid_left = fork();
 	if (pid_left == 0)
 	{
 		close(fd[0]);
 		dup2(fd[1], STDOUT_FILENO);
-		execute(pipe_node->writer, &env);
 		close(fd[1]);
-		exit(EXIT_SUCCESS);
+		exit(execute(pipe_node->writer, &env));
 	}
 	pid_right = fork();
 	if (pid_right == 0)
 	{
 		close(fd[1]);
 		dup2(fd[0], STDIN_FILENO);
-		execute(pipe_node->reader, &env);
 		close(fd[0]);
-		exit(EXIT_SUCCESS);
+		exit(execute(pipe_node->reader, &env));
 	}
 	close(fd[0]);
 	close(fd[1]);
 	waitpid(pid_left, NULL, 0);
-	waitpid(pid_right, NULL, 0);
+	waitpid(pid_right, &status, 0);
+	if (WIFEXITED(status))
+		return (WEXITSTATUS(status));
+	else
+		return (1);
 }
 
-/* DOCS : WIFEXITED && WEXITSTATUS-> A voir si macros interdites...
- * 		Si c'est le cas, le code sera a repenser voir recreer ces macros
- * https://sites.uclouvain.be/SystInfo/usr/include/bits/waitstatus.h.html
- */
-void	execute_logical(t_node *logical_node, t_env *env)
+int	execute_logical(t_node *logical_node, t_env *env)
 {
 	int		status;
 
-	execute(logical_node->writer, &env);
-	wait(&status);
-	if (logical_node->type == LOGICAL_AND && WIFEXITED(status)
-		&& WEXITSTATUS(status) == 0)
-		execute(logical_node->reader, &env);
-	else if (logical_node->type == LOGICAL_OR && WIFEXITED(status)
-		&& WEXITSTATUS(status) != 0)
-		execute(logical_node->reader, &env);
+	status = execute(logical_node->writer, &env);
+	if (logical_node->type == LOGICAL_AND && status == 0)
+		return (execute(logical_node->reader, &env));
+	else if (logical_node->type == LOGICAL_OR && status != 0)
+		return (execute(logical_node->reader, &env));
+	return (status);
 }
 
-void	execute_semicolon(t_node *semi_node, t_env *env)
+int	execute_semicolon(t_node *semi_node, t_env *env)
 {
 	execute(semi_node->writer, &env);
-	execute(semi_node->reader, &env);
+	return (execute(semi_node->reader, &env));
 }
 
 int	handle_redirections(t_node *cmd)
@@ -114,8 +124,13 @@ int	handle_redirections(t_node *cmd)
 	int	fd;
 	int	i;
 
-	i = -1;
-	while (++i < cmd->redir_count)
+	i = 0;
+	if ((cmd->redirs == NULL && cmd->redir_count > 0))
+	{
+		ft_printf("minishell: redirection: invalid command\n");
+		return (-1);
+	}
+	while (i < cmd->redir_count)
 	{
 		if (cmd->redirs[i].type == REDIRECT_OUT)
 			fd = open(cmd->redirs[i].filename,
@@ -138,6 +153,7 @@ int	handle_redirections(t_node *cmd)
 		else
 			dup2(fd, STDOUT_FILENO);
 		close(fd);
+		i++;
 	}
 	return (0);
 }

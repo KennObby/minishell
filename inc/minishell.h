@@ -183,14 +183,14 @@ const char	*redir_type_str(t_type type);
 const char	*type_to_str(t_type type);
 
 //< --------------------------- exec_ops.c -------------------- >
-void		execute_cmd(t_node *cmd, t_env *env_list);
-void		execute_pipe(t_node *pipe_node, t_env *env);
-void		execute_logical(t_node *logical_node, t_env *env);
-void		execute_semicolon(t_node *semi_node, t_env *env);
+int			execute_cmd(t_node *cmd, t_env *env_list);
+int			execute_pipe(t_node *pipe_node, t_env *env);
+int			execute_logical(t_node *logical_node, t_env *env);
+int			execute_semicolon(t_node *semi_node, t_env *env);
 int			handle_redirections(t_node *cmd);
 
 //< --------------------------- exec_mgmt.c ------------------- >
-void		execute(t_node *node, t_env **env);
+int			execute(t_node *node, t_env **env);
 int			handle_heredoc(char *delimiter);
 
 //< --------------------------- BUILT-INS --------------------- >
@@ -210,7 +210,7 @@ void		free_env_list(t_env *env);
 void		free_str_array(char **paths);
 
 //< --------------------------- pwd.c ------------------------- >
-int		builtin_pwd(void);
+int			builtin_pwd(void);
 
 //< --------------------------- cd_mgmt.c --------------------- >
 char		*handle_cd_path(t_node *cmd, t_env **env);
@@ -220,7 +220,8 @@ int			builtin_cd(t_node *cmd, t_env **env);
 int			is_builtin(char *cmd);
 
 //< --------------------------- builltin_mgmt.c --------------- >
-int		builtin_env(t_env *env);
+int			builtin_env(t_env *env);
+int			builtin_echo(t_node *cmd);
 int			exec_builtin(t_node *cmd, t_env **env);
 
 #endif

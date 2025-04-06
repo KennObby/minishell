@@ -22,6 +22,22 @@ int	builtin_env(t_env *env)
 	return (0);
 }
 
+int	builtin_echo(t_node *cmd)
+{
+	int	i;
+
+	i = 1;
+	while (cmd->args[i])
+	{
+		ft_printf("%s", cmd->args[i]);
+		if (cmd->args[i + 1])
+			ft_printf(" ");
+		i++;
+	}
+	ft_printf("\n");
+	return (0);
+}
+
 /*
  * A replacer par is_env, is_export etc ou trouver une
  * strat pour tout les builtins au fur et a mesure
@@ -30,7 +46,8 @@ int	is_builtin(char *cmd)
 {
 	return (!ft_strcmp(cmd, "env")
 		|| !ft_strcmp(cmd, "pwd")
-		|| !ft_strcmp(cmd, "cd"));
+		|| !ft_strcmp(cmd, "cd")
+		|| !ft_strcmp(cmd, "echo"));
 }
 
 int	exec_builtin(t_node *cmd, t_env **env)
@@ -41,6 +58,8 @@ int	exec_builtin(t_node *cmd, t_env **env)
 		return (builtin_pwd());
 	if (!ft_strcmp(cmd->args[0], "cd"))
 		return (builtin_cd(cmd, env));
+	if (!ft_strcmp(cmd->args[0], "echo"))
+		return (builtin_echo(cmd));
 	ft_printf(">>> running builtin: %s\n", cmd->args[0]);
 	return (127);
 }

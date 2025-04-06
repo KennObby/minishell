@@ -11,26 +11,26 @@
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
+#include <stdio.h>
 
-void	execute(t_node *node, t_env **env)
+int	execute(t_node *node, t_env **env)
 {
 	if (!node)
-		return ;
+		return (0);
 	if (node->type == CMD)
 	{
 		if (is_builtin(node->args[0]))
-		{
-			exec_builtin(node, env);
-			return ;
-		}
-		execute_cmd(node, *env);
+			return (exec_builtin(node, env));
+		else
+			return (execute_cmd(node, *env));
 	}
 	if (node->type == PIPE)
-		execute_pipe(node, *env);
+		return (execute_pipe(node, *env));
 	if (node->type == SEMICOLON)
-		execute_semicolon(node, *env);
+		return (execute_semicolon(node, *env));
 	if (node->type == LOGICAL_AND || node->type == LOGICAL_OR)
-		execute_logical(node, *env);
+		return (execute_logical(node, *env));
+	return (0);
 }
 
 int	handle_heredoc(char *delimiter)
@@ -38,7 +38,11 @@ int	handle_heredoc(char *delimiter)
 	char	*line;
 	int		pipefd[2];
 
-	pipe(pipefd);
+	if (pipe(pipefd) == -1)
+	{
+		perror("minishell");
+		return (-1);
+	}
 	while (1)
 	{
 		line = readline(">");
@@ -48,7 +52,8 @@ int	handle_heredoc(char *delimiter)
 		write(pipefd[1], "\n", 1);
 		free(line);
 	}
-	free(line);
+	if (line)
+		free(line);
 	close(pipefd[1]);
 	return (pipefd[0]);
 }

@@ -66,7 +66,7 @@ void	execute_pipe(t_node *pipe_node, t_env *env)
 	{
 		close(fd[0]);
 		dup2(fd[1], STDOUT_FILENO);
-		execute(pipe_node->writer, env);
+		execute(pipe_node->writer, &env);
 		close(fd[1]);
 		exit(EXIT_SUCCESS);
 	}
@@ -75,7 +75,7 @@ void	execute_pipe(t_node *pipe_node, t_env *env)
 	{
 		close(fd[1]);
 		dup2(fd[0], STDIN_FILENO);
-		execute(pipe_node->reader, env);
+		execute(pipe_node->reader, &env);
 		close(fd[0]);
 		exit(EXIT_SUCCESS);
 	}
@@ -93,20 +93,20 @@ void	execute_logical(t_node *logical_node, t_env *env)
 {
 	int		status;
 
-	execute(logical_node->writer, env);
+	execute(logical_node->writer, &env);
 	wait(&status);
 	if (logical_node->type == LOGICAL_AND && WIFEXITED(status)
 		&& WEXITSTATUS(status) == 0)
-		execute(logical_node->reader, env);
+		execute(logical_node->reader, &env);
 	else if (logical_node->type == LOGICAL_OR && WIFEXITED(status)
 		&& WEXITSTATUS(status) != 0)
-		execute(logical_node->reader, env);
+		execute(logical_node->reader, &env);
 }
 
 void	execute_semicolon(t_node *semi_node, t_env *env)
 {
-	execute(semi_node->writer, env);
-	execute(semi_node->reader, env);
+	execute(semi_node->writer, &env);
+	execute(semi_node->reader, &env);
 }
 
 int	handle_redirections(t_node *cmd)

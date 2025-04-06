@@ -13,14 +13,16 @@
 #include "../../../inc/minishell.h"
 #include <stdio.h>
 
-void	builtin_pwd(void)
+int	builtin_pwd(void)
 {
 	char	cwd[MAX_PATH];
 
 	if (getcwd(cwd, sizeof(cwd)) != NULL)
-	{
 		ft_printf("%s\n", cwd);
-	}
 	else
+	{
 		perror("cwd out of scope");
+		return (1);
+	}
+	return (0);
 }

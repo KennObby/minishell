@@ -11,6 +11,9 @@
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
+#include <readline/readline.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 void	print_tree(t_node *node, int depth)
 {
@@ -52,6 +55,30 @@ void	print_tree(t_node *node, int depth)
 	}
 	//print_tree(node->writer, depth + 4);
 }
+
+char	*built_prompt(t_env *env)
+{
+	char	*home;
+	char	cwd[MAX_PATH];
+	char	*relative;
+	char	*tmp;
+	char	*prompt;
+
+	home = get_env_value(env, "HOME");
+	if (!getcwd(cwd, sizeof(cwd)))
+		return (ft_strdup("minishell> "));
+	if (home && ft_strcmp(cwd, home) == 0)
+		return (ft_strdup("minishell> "));
+	if (home && ft_strncmp(cwd, home, ft_strlen(home)) == 0)
+	{
+		relative = cwd + ft_strlen(home);
+		tmp = ft_strjoin("~", relative);
+		prompt = ft_strjoin(tmp, " > ");
+		free(tmp);
+		return (prompt);
+	}
+	return (ft_strjoin(cwd, " > "));
+}
 /*
  * ast = https://deepsource.com/glossary/ast 
  * environment variables tried to be managed (char **envp)
@@ -61,6 +88,7 @@ void	print_tree(t_node *node, int depth)
 int	main(int ac, char **av, char **envp)
 {
 	char		*rl;
+	char		*prompt;
 	t_token		*tokens;
 	t_parser	parser;
 	t_node		*ast;
@@ -69,17 +97,20 @@ int	main(int ac, char **av, char **envp)
 	(void)ac;
 	(void)av;
 	env_list = init_env_list(envp);
-	while ((rl = readline("minishell> ")) != NULL)
+	bump_shlvl(env_list);
+	while (1)
 	{
+		prompt = built_prompt(env_list);
+		rl = readline(prompt);
+		if (!rl)
+			break ;
 		if (ft_strlen(rl) > 0)
 			add_history(rl);
-		ft_printf("\n");
 		tokens = tokenize(rl);
 		parser = (t_parser){tokens, 0};
 		ast = parse(&parser);
 		//print_tree(ast, 0);
-		execute(ast, env_list);
-		bump_shlvl(env_list);
+		execute(ast, &env_list);
 		free_tree(ast);
 		free_tokens(tokens);
 		free(rl);

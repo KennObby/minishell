@@ -12,13 +12,14 @@
 
 #include "../../inc/minishell.h"
 
-void	builtin_env(t_env *env)
+int	builtin_env(t_env *env)
 {
 	while (env)
 	{
 		ft_printf("%s=%s\n", env->key, env->value);
 		env = env->next;
 	}
+	return (0);
 }
 
 /*
@@ -27,13 +28,19 @@ void	builtin_env(t_env *env)
  */
 int	is_builtin(char *cmd)
 {
-	return (ft_strcmp(cmd, "env"));
+	return (!ft_strcmp(cmd, "env")
+		|| !ft_strcmp(cmd, "pwd")
+		|| !ft_strcmp(cmd, "cd"));
 }
 
-void	exec_builtin(t_node *cmd, t_env *env)
+int	exec_builtin(t_node *cmd, t_env **env)
 {
 	if (!ft_strcmp(cmd->args[0], "env"))
-		builtin_env(env);
+		return (builtin_env(*env));
 	if (!ft_strcmp(cmd->args[0], "pwd"))
-		builtin_pwd();
+		return (builtin_pwd());
+	if (!ft_strcmp(cmd->args[0], "cd"))
+		return (builtin_cd(cmd, env));
+	ft_printf(">>> running builtin: %s\n", cmd->args[0]);
+	return (127);
 }

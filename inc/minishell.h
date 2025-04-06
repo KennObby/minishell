@@ -142,13 +142,9 @@ typedef struct s_node
 	struct s_node	*reader;
 }				t_node;
 
-/*
- * MAX_PATH related to PATH_MAX on <linux/limits.h> macro value
- * DOCS:https://stackoverflow.com/questions/9449241/where-is-path-max-defined-in-linux 
- */
 # define MAX_TOKENS 1024
 # define MAX_ARGS 1024
-# define MAX_PATH 4096
+# define MAX_PATH 1024
 //< --------------------------- FUNCTIONS --------------------- >
 //
 //< --------------------------- BINARY TREE ------------------- >
@@ -179,6 +175,7 @@ void		free_tree(t_node *node);
 void		free_tokens(t_token *tokens);
 
 //< --------------------------- main.c ------------------------ >
+char		*build_prompt(t_env *env);
 void		print_tree(t_node *node, int depth);
 
 //< --------------------------- to_str_helper.c --------------- >
@@ -193,7 +190,7 @@ void		execute_semicolon(t_node *semi_node, t_env *env);
 int			handle_redirections(t_node *cmd);
 
 //< --------------------------- exec_mgmt.c ------------------- >
-void		execute(t_node *node, t_env *env);
+void		execute(t_node *node, t_env **env);
 int			handle_heredoc(char *delimiter);
 
 //< --------------------------- BUILT-INS --------------------- >
@@ -213,13 +210,17 @@ void		free_env_list(t_env *env);
 void		free_str_array(char **paths);
 
 //< --------------------------- pwd.c ------------------------- >
-void		builtin_pwd(void);
+int		builtin_pwd(void);
+
+//< --------------------------- cd_mgmt.c --------------------- >
+char		*handle_cd_path(t_node *cmd, t_env **env);
+int			builtin_cd(t_node *cmd, t_env **env);
 
 //< --------------------------- builtin_utils.c --------------- >
 int			is_builtin(char *cmd);
 
 //< --------------------------- builltin_mgmt.c --------------- >
-void		builtin_env(t_env *env);
-void		exec_builtin(t_node *cmd, t_env *env);
+int		builtin_env(t_env *env);
+int			exec_builtin(t_node *cmd, t_env **env);
 
 #endif

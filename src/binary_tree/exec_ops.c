@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
+#include <fcntl.h>
 #include <stdlib.h>
 #include <unistd.h>
 /* DOCS : WIFEXITED && WEXITSTATUS-> A voir si macros interdites...
@@ -27,8 +28,15 @@ int	execute_cmd(t_node *cmd, t_env *env_list)
 	if (handle_redirections(cmd) != 0)
 		return (1);
 	pid = fork();
+	if (pid < 0)
+	{
+		perror("minishell");
+		return (1);
+	}
 	if (pid == 0)
 	{
+		if (handle_redirections(cmd) != 0)
+			exit(1);
 		envp = env_list_to_array(env_list);
 		if (ft_strchr(cmd->args[0], '/'))
 		{
@@ -47,19 +55,10 @@ int	execute_cmd(t_node *cmd, t_env *env_list)
 		ft_printf("minishell: failed to exec: %s\n", cmd_path);
 		exit(1);
 	}
-	else if (pid < 0)
-	{
-		perror("minishell");
-		return (1);
-	}
-	else
-		waitpid(pid, &status, 0);
-	ft_printf(">> executing command: %s\n", cmd->args[0]);
-	ft_printf(">> redir count: %d\n", cmd->redir_count);
+	waitpid(pid, &status, 0);
 	if (WIFEXITED(status))
 		return (WEXITSTATUS(status));
-	else
-		return (1);
+	return (1);
 }
 
 int	execute_pipe(t_node *pipe_node, t_env *env)
@@ -132,6 +131,7 @@ int	handle_redirections(t_node *cmd)
 	}
 	while (i < cmd->redir_count)
 	{
+		fd = -1;
 		if (cmd->redirs[i].type == REDIRECT_OUT)
 			fd = open(cmd->redirs[i].filename,
 					O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -141,7 +141,7 @@ int	handle_redirections(t_node *cmd)
 		else if (cmd->redirs[i].type == REDIRECT_IN)
 			fd = open(cmd->redirs[i].filename, O_RDONLY);
 		else if (cmd->redirs[i].type == HEREDOC)
-			fd = handle_heredoc(cmd->redirs[i].filename);
+			fd = cmd->redirs[i].fd;
 		if (fd == -1)
 		{
 			perror("minishell");

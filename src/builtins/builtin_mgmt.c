@@ -42,12 +42,19 @@ int	builtin_echo(t_node *cmd)
  * A replacer par is_env, is_export etc ou trouver une
  * strat pour tout les builtins au fur et a mesure
  */
-int	is_builtin(char *cmd)
+int	is_forkable_builtin(char *cmd)
 {
 	return (!ft_strcmp(cmd, "env")
 		|| !ft_strcmp(cmd, "pwd")
-		|| !ft_strcmp(cmd, "cd")
 		|| !ft_strcmp(cmd, "echo"));
+}
+
+int	is_parent_only_builtin(char *cmd)
+{
+	return (!ft_strcmp(cmd, "cd")
+		|| !ft_strcmp(cmd, "exit")
+		|| !ft_strcmp(cmd, "unset")
+		|| !ft_strcmp(cmd, "export"));
 }
 
 int	exec_builtin(t_node *cmd, t_env **env)

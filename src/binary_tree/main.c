@@ -102,6 +102,7 @@ int	main(int ac, char **av, char **envp)
 	{
 		prompt = built_prompt(env_list);
 		rl = readline(prompt);
+		free(prompt);
 		if (!rl)
 			break ;
 		if (ft_strlen(rl) > 0)

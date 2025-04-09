@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
+#include <stdlib.h>
 
 t_node	*parse_semicolon(t_parser *parser)
 {
@@ -72,6 +73,8 @@ t_node	*parse_command(t_parser *parser)
 	t_node	*cmd_node;
 
 	args = malloc(MAX_ARGS * sizeof(char *));
+	if (!args)
+		return (NULL);
 	arg_count = 0;
 	while (parser->pos < MAX_TOKENS
 		&& parser->tokens[parser->pos].type == WORD)
@@ -80,7 +83,15 @@ t_node	*parse_command(t_parser *parser)
 		parser->pos++;
 	}
 	args[arg_count] = NULL;
+	if (arg_count == 0 && !is_redirection(peek(parser)))
+	{
+		free(args);
+		ft_printf("minishell: invalid command");
+		return (NULL);
+	}
 	cmd_node = create_leaf(args);
+	if (!cmd_node)
+		return (NULL);
 	parse_redirects(parser, cmd_node);
 	return (cmd_node);
 }

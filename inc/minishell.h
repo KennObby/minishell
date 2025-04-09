@@ -90,10 +90,16 @@ typedef struct s_parser
 	int		pos;
 }				t_parser;
 
+/*
+ * filename = stores regular redirs
+ * fd = for HEREDOC (read-end of pipe)
+ *
+ */
 typedef struct s_redir
 {
 	t_type	type;
 	char	*filename;
+	int		fd;
 }				t_redir;
 
 /*
@@ -191,6 +197,7 @@ int			handle_redirections(t_node *cmd);
 
 //< --------------------------- exec_mgmt.c ------------------- >
 int			execute(t_node *node, t_env **env);
+void		prepare_heredocs(t_node *node);
 int			handle_heredoc(char *delimiter);
 
 //< --------------------------- BUILT-INS --------------------- >
@@ -222,6 +229,8 @@ int			is_builtin(char *cmd);
 //< --------------------------- builltin_mgmt.c --------------- >
 int			builtin_env(t_env *env);
 int			builtin_echo(t_node *cmd);
+int			is_forkable_bultin(char *cmd);
+int			is_parent_only_builtin(char *cmd);
 int			exec_builtin(t_node *cmd, t_env **env);
 
 #endif

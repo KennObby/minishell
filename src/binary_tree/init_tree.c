@@ -17,6 +17,11 @@ t_node	*create_leaf(char **args)
 	t_node	*node;
 
 	node = malloc(sizeof(t_node));
+	if (!node)
+	{
+		perror("minishell: malloc on leaf failed");
+		exit(1);
+	}
 	node->type = CMD;
 	node->args = args;
 	node->writer = NULL;
@@ -31,6 +36,11 @@ t_node	*create_node(t_type type, t_node *left, t_node *right)
 	t_node	*node;
 
 	node = malloc(sizeof(t_node));
+	if (!node)
+	{
+		perror("minishell: malloc on node failed");
+		exit(1);
+	}
 	node->type = type;
 	node->args = NULL;
 	node->writer = left;

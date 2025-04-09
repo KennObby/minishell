@@ -1,0 +1,1 @@
+[?2004h~/common-core/minishell > ^C[?2004l

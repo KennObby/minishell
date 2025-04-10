@@ -63,8 +63,8 @@ void	prepare_heredocs(t_node *node)
 		{
 			if (node->redirs[i].type == HEREDOC)
 				node->redirs[i].fd = handle_heredoc(node->redirs[i].filename);
+			i++;
 		}
-		i++;
 	}
 	prepare_heredocs(node->writer);
 	prepare_heredocs(node->reader);
@@ -84,7 +84,10 @@ int	handle_heredoc(char *delimiter)
 	{
 		line = readline(">");
 		if (!line || ft_strcmp(line, delimiter) == 0)
+		{
+			write(1, "\n", 1);
 			break ;
+		}
 		write(pipefd[1], line, ft_strlen(line));
 		write(pipefd[1], "\n", 1);
 		free(line);

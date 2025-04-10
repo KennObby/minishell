@@ -111,6 +111,7 @@ int	main(int ac, char **av, char **envp)
 		parser = (t_parser){tokens, 0};
 		ast = parse(&parser);
 		//print_tree(ast, 0);
+		prepare_heredocs(ast);
 		execute(ast, &env_list);
 		free_tree(ast);
 		free_tokens(tokens);

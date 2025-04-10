@@ -14,9 +14,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <unistd.h>
-/* DOCS : WIFEXITED && WEXITSTATUS-> A voir si macros interdites...
- * 		Si c'est le cas, le code sera a repenser voir recreer ces macros
- * https://sites.uclouvain.be/SystInfo/usr/include/bits/waitstatus.h.html
+/* DOCS : https://sites.uclouvain.be/SystInfo/usr/include/bits/waitstatus.h.html
  */
 int	execute_cmd(t_node *cmd, t_env *env_list)
 {
@@ -25,8 +23,6 @@ int	execute_cmd(t_node *cmd, t_env *env_list)
 	int		status;
 	pid_t	pid;
 
-	if (handle_redirections(cmd) != 0)
-		return (1);
 	pid = fork();
 	if (pid < 0)
 	{

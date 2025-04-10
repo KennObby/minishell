@@ -148,6 +148,7 @@ t_node	*parse_grouping(t_parser *parser)
 			return (NULL);
 		}
 		consume(parser);
+		parse_redirects(parser, subtree);
 		return (subtree);
 	}
 	else

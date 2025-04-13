@@ -81,7 +81,7 @@ typedef struct s_token
 
 /*
  * binary tree parser, identifying nodes by recursively trying to follow 
- * precedence POSIX bash operators (e.g "|", "<<", etc...)
+ * precedence of POSIX bash operators (e.g "|", "<<", etc...)
  *
  */
 typedef struct s_parser

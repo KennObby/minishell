@@ -14,30 +14,38 @@
 
 const char	*redir_type_str(t_type type)
 {
-	switch (type)
+	static const char	*redir_str[4];
+
+	if (redir_str[0] == NULL)
 	{
-		case REDIRECT_IN:	return ("<");
-		case REDIRECT_OUT: 	return (">");
-		case APPEND:		return (">>");
-		case HEREDOC:		return ("<<");
-		default:			return ("UNKNOWN REDIR");
+		redir_str[REDIRECT_IN] = "<";
+		redir_str[REDIRECT_OUT] = ">";
+		redir_str[APPEND] = ">>";
+		redir_str[HEREDOC] = "<<";
 	}
+	if (type >= REDIRECT_IN && type <= HEREDOC)
+		return (redir_str[type]);
+	return ("UNKNOWN REDIR");
 }
 
 const char	*type_to_str(t_type type)
 {
-	switch (type)
+	static const char	*type_str[10];
+
+	if (type_str[0] == NULL)
 	{
-		case CMD:			return ("CMD");
-		case PIPE:			return ("|");
-		case SEMICOLON:		return (";");
-		case LOGICAL_AND:	return ("&&");
-		case LOGICAL_OR:	return ("||");
-		case GROUPING:		return ("()");
-		case REDIRECT_IN:
-		case REDIRECT_OUT:
-		case APPEND:
-		case HEREDOC:		return redir_type_str(type);
-		default:			return ("UNKNOWN");
+		type_str[CMD] = "CMD";
+		type_str[PIPE] = "|";
+		type_str[SEMICOLON] = ";";
+		type_str[LOGICAL_AND] = "&&";
+		type_str[LOGICAL_OR] = "||";
+		type_str[GROUPING] = "()";
+		type_str[REDIRECT_IN] = ">";
+		type_str[REDIRECT_OUT] = "<";
+		type_str[APPEND] = ">>";
+		type_str[HEREDOC] = "<<";
 	}
+	if (type >= CMD && type <= HEREDOC && type_str[type])
+		return (type_str[type]);
+	return ("UNKNOWN TYPE");
 }

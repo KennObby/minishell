@@ -18,28 +18,16 @@
 
 int	execute(t_node *node, t_env **env)
 {
-	int	saved_in;
-	int	saved_out;
-	int	status;
-
 	if (!node)
 		return (0);
 	if (node->type == CMD)
 	{
 		if (is_parent_only_builtin(node->args[0]))
-		{
-			saved_in = dup(STDIN_FILENO);
-			saved_out = dup(STDOUT_FILENO);
-			if (handle_redirections(node) != 0)
-				return (1);
-			status = exec_builtin(node, env);
-			dup2(saved_in, STDIN_FILENO);
-			dup2(saved_out, STDOUT_FILENO);
-			close(saved_in);
-			close(saved_out);
-			return (status);
-		}
-		return (execute_cmd(node, *env));
+			return (execute_is_parent_only_builtin(node, env));
+		else if (is_forkable_builtin(node->args[0]))
+			return (execute_forked_builtin(node, env));
+		else
+			return (execute_cmd(node, *env));
 	}
 	if (node->type == PIPE)
 		return (execute_pipe(node, *env));
@@ -48,6 +36,55 @@ int	execute(t_node *node, t_env **env)
 	if (node->type == LOGICAL_AND || node->type == LOGICAL_OR)
 		return (execute_logical(node, *env));
 	return (0);
+}
+
+int	execute_is_parent_only_builtin(t_node *cmd, t_env **env)
+{
+	int	status;
+	int	saved_in;
+	int	saved_out;
+
+	saved_in = dup(STDIN_FILENO);
+	saved_out = dup(STDOUT_FILENO);
+	if (handle_redirections(cmd) != 0)
+	{
+		dup2(saved_in, STDIN_FILENO);
+		dup2(saved_out, STDIN_FILENO);
+		close(saved_in);
+		close(saved_out);
+		return (1);
+	}
+	status = exec_builtin(cmd, env);
+	dup2(saved_in, STDIN_FILENO);
+	dup2(saved_out, STDOUT_FILENO);
+	close(saved_in);
+	close(saved_out);
+	return (status);
+}
+
+int	execute_forked_builtin(t_node *cmd, t_env **env)
+{
+	pid_t	pid;
+	int		status;
+
+	pid = fork();
+	if (pid < 0)
+	{
+		perror("minishell");
+		return (1);
+	}
+	if (pid == 0)
+	{
+		if (handle_redirections(cmd) != 0)
+			exit(1);
+		exit(exec_builtin(cmd, env));
+	}
+	waitpid(pid, &status, 0);
+	if (WIFEXITED(status))
+		return (WEXITSTATUS(status));
+	else if (WIFSIGNALED(status))
+		return (128 + WTERMSIG(status));
+	return (1);
 }
 
 void	prepare_heredocs(t_node *node)

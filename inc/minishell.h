@@ -197,6 +197,8 @@ int			handle_redirections(t_node *cmd);
 
 //< --------------------------- exec_mgmt.c ------------------- >
 int			execute(t_node *node, t_env **env);
+int			execute_forked_builtin(t_node *cmd, t_env **env);
+int			execute_is_parent_only_builtin(t_node *cmd, t_env **env);
 void		prepare_heredocs(t_node *node);
 int			handle_heredoc(char *delimiter);
 
@@ -223,13 +225,20 @@ int			builtin_pwd(void);
 char		*handle_cd_path(t_node *cmd, t_env **env);
 int			builtin_cd(t_node *cmd, t_env **env);
 
+//< --------------------------- echo_mgmt.c ------------------- >
+char		*handle_single_quotes(char *arg);
+char		*extract_var_name(const char *s);
+char		*ft_strjoin_free(char *s1, const char *s2);
+char		*expand_double_quoted(const char *s, t_env **env);
+char		*handle_double_quotes(char *arg, t_env **env);
+
 //< --------------------------- builtin_utils.c --------------- >
 int			is_builtin(char *cmd);
 
 //< --------------------------- builltin_mgmt.c --------------- >
 int			builtin_env(t_env *env);
-int			builtin_echo(t_node *cmd);
-int			is_forkable_bultin(char *cmd);
+int			builtin_echo(t_node *cmd, t_env **env);
+int			is_forkable_builtin(char *cmd);
 int			is_parent_only_builtin(char *cmd);
 int			exec_builtin(t_node *cmd, t_env **env);
 

@@ -22,16 +22,29 @@ int	builtin_env(t_env *env)
 	return (0);
 }
 
-int	builtin_echo(t_node *cmd)
+int	builtin_echo(t_node *cmd, t_env **env)
 {
-	int	i;
+	int		i;
+	char	*output;
 
 	i = 1;
 	while (cmd->args[i])
 	{
-		ft_printf("%s", cmd->args[i]);
+		output = NULL;
+		if (cmd->args[i][0] == '\'' && ft_strlen(cmd->args[i]) > 1
+			&& cmd->args[i][ft_strlen(cmd->args[i]) - 1]== '\'')
+			output = handle_single_quotes(cmd->args[i]);
+		else if (cmd->args[i][0] == '"' && ft_strlen(cmd->args[i]) > 1
+			&& cmd->args[i][ft_strlen(cmd->args[i]) - 1]== '"')
+			output = handle_double_quotes(cmd->args[i], env);
+		else if (ft_strchr(cmd->args[i], '$'))
+			output = expand_double_quoted(ft_strdup(cmd->args[i]), env);
+		else
+			output = ft_strdup(cmd->args[i]);
+		ft_printf("%s", output);
 		if (cmd->args[i + 1])
 			ft_printf(" ");
+		free(output);
 		i++;
 	}
 	ft_printf("\n");
@@ -66,7 +79,7 @@ int	exec_builtin(t_node *cmd, t_env **env)
 	if (!ft_strcmp(cmd->args[0], "cd"))
 		return (builtin_cd(cmd, env));
 	if (!ft_strcmp(cmd->args[0], "echo"))
-		return (builtin_echo(cmd));
+		return (builtin_echo(cmd, env));
 	ft_printf(">>> running builtin: %s\n", cmd->args[0]);
 	return (127);
 }

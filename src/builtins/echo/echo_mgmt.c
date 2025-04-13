@@ -11,15 +11,117 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
-
-char	handle_single_quotes(t_node *cmd, t_env **env)
+/*
+ * In C convention, '\'' represents a single quote (e.g: " ' ")
+ * Like, every "valid escapes" character can be isloated this way.
+ * Those are the double quote, backslash, Newline, Tab and null
+ *
+ * -> \', \", \\, \n, \t, \0
+ *
+ */
+char	*handle_single_quotes(char *arg)
 {
-	int	i;
+	int		i;
+	int		len;
 
+	len = ft_strlen(arg);
 	i = 0;
-	while (cmd->args[i])
+	while (arg[i])
 	{
-		if (ft_strcmp(cmd->args[1], "'"))
-
+		if (arg[0] == '\'' && arg[len - 1] == '\'')
+			return (ft_substr(arg, 1, len - 2));
+		i++;
 	}
+	return (arg);
+}
+
+char	*extract_var_name(const char *s)
+{
+	int	len;
+
+	len = 0;
+	if (!s)
+		return (NULL);
+	while (s[len] && (ft_isalnum(s[len]) || s[len] == '_'))
+		len++;
+	return (ft_substr(s, 0, len));
+}
+/*
+ * This function has to be moved elsewhere (on utils ?)
+ * expand_double_quoted has too much lines
+ */
+char	*ft_strjoin_free(char *s1, const char *s2)
+{
+	char	*joined;
+
+	if (!s1)
+		return (ft_strdup(s2));
+	joined = ft_strjoin(s1, s2);
+	free(s1);
+	return (joined);
+}
+/*
+ * This functions heavy lifts of ->
+ * 1 ) Parsing escapes mentionnned lines below
+ * 2 ) Handles '$' edge cases by extracting the name variable
+ * 3 ) Substition of strings if no characters looked for found
+ *
+ */
+char	*expand_double_quoted(const char *s, t_env **env)
+{
+	char	*result;
+	int		i;
+	char	*tmp;
+	char	*name;
+
+	result = ft_strdup("");
+	i = 0;
+	while (s[i])
+	{
+		if (s[i] == '\\' && (s[i + 1] == '$'
+			|| s[i + 1] == '"' || s[i + 1] == '\\'))
+		{
+			tmp = ft_substr(s, i + 1, 1);
+			result = ft_strjoin_free(result, tmp);
+			free(tmp);
+			i += 2;
+		}
+		else if (s[i] == '$')
+		{
+			name = extract_var_name(&s[i + 1]);
+			tmp = get_env_value(*env, name);
+			if (tmp)
+				result = ft_strjoin_free(result, tmp);
+			else
+				result = ft_strjoin_free(result, "");
+			i += ft_strlen(name) + 1;
+			free(name);
+		}
+		else
+		{
+			tmp = ft_substr(s, i, 1);
+			result = ft_strjoin_free(result, tmp);
+			free(tmp);
+			i++;
+		}
+	}
+	ft_printf(">> expanding quotes: %s\n", s);
+	free((char *)s);
+	return (result);
+}
+
+char	*handle_double_quotes(char *arg, t_env **env)
+{
+	char	*stripped;
+
+	if (!arg || ft_strlen(arg) < 2)
+		return (ft_strdup(arg));
+	if (arg[0] == '"' && arg[ft_strlen(arg) - 1] == '"')
+		stripped = ft_substr(arg, 1, ft_strlen(arg) - 2);
+	else
+		return (ft_strdup(arg));
+	if (!stripped)
+		return (NULL);
+	ft_printf(">> stripped: = %s\n", stripped);
+	return (expand_double_quoted(stripped, env));
 }

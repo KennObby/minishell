@@ -71,6 +71,8 @@ t_node	*parse_command(t_parser *parser)
 	char	**args;
 	int		arg_count;
 	t_node	*cmd_node;
+	char	*merged;
+	char	*tmp;
 
 	args = malloc(MAX_ARGS * sizeof(char *));
 	if (!args)
@@ -79,14 +81,25 @@ t_node	*parse_command(t_parser *parser)
 	while (parser->pos < MAX_TOKENS
 		&& parser->tokens[parser->pos].type == WORD)
 	{
-		args[arg_count++] = ft_strdup(parser->tokens[parser->pos].value);
+		merged = ft_strdup(parser->tokens[parser->pos].value);
 		parser->pos++;
+		while (parser->pos < MAX_TOKENS
+			&& parser->tokens[parser->pos].type == WORD)
+		{
+			tmp = merged;
+			merged = ft_strjoin(merged, parser->tokens[parser->pos].value);
+			free(tmp);
+			if (!merged)
+				return (NULL);
+			parser->pos++;
+		}
+		args[arg_count++] = merged;
 	}
 	args[arg_count] = NULL;
 	if (arg_count == 0 && !is_redirection(peek(parser)))
 	{
 		free(args);
-		ft_printf("minishell: invalid command");
+		ft_printf("minishell: invalid command\n");
 		return (NULL);
 	}
 	cmd_node = create_leaf(args);

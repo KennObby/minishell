@@ -14,8 +14,9 @@
 
 const char	*redir_type_str(t_type type)
 {
-	static const char	*redir_str[4];
+	const char	*redir_str[NB_TYPES];
 
+	//redir_str = {0};
 	if (redir_str[0] == NULL)
 	{
 		redir_str[REDIRECT_IN] = "<";
@@ -30,8 +31,9 @@ const char	*redir_type_str(t_type type)
 
 const char	*type_to_str(t_type type)
 {
-	static const char	*type_str[10];
+	const char	*type_str[NB_TYPES];
 
+	//type_str = {0};
 	if (type_str[0] == NULL)
 	{
 		type_str[CMD] = "CMD";

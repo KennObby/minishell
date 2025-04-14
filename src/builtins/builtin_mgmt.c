@@ -32,7 +32,7 @@ int	builtin_echo(t_node *cmd, t_env **env)
 	{
 		output = NULL;
 		if (cmd->args[i][0] == '\'' && ft_strlen(cmd->args[i]) > 1
-			&& cmd->args[i][ft_strlen(cmd->args[i]) - 1]== '\'')
+				&& cmd->args[i][ft_strlen(cmd->args[i]) - 1]== '\'')
 			output = handle_single_quotes(cmd->args[i]);
 		else if (cmd->args[i][0] == '"' && ft_strlen(cmd->args[i]) > 1
 			&& cmd->args[i][ft_strlen(cmd->args[i]) - 1]== '"')

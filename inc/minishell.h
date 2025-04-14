@@ -66,6 +66,7 @@ typedef enum e_type
 	GROUPING_OPEN,
 	GROUPING_CLOSE,
 	END,
+	NB_TYPES,
 }				t_type;
 
 /*
@@ -77,6 +78,7 @@ typedef struct s_token
 {
 	t_type	type;
 	char	*value;
+	bool	has_no_space_after;
 }				t_token;
 
 /*
@@ -175,6 +177,9 @@ t_node		*parse_grouping(t_parser *parser);
 //< --------------------------- token.c ----------------------- >
 int			is_operator(char c);
 t_token		*tokenize(char *input);
+
+//< --------------------------- token_utils.c ----------------- >
+bool		has_no_space_after(char *input, int pos);
 
 //< --------------------------- free_tree.c ------------------- >
 void		free_tree(t_node *node);

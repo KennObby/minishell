@@ -14,7 +14,7 @@
 /*
  * In C convention, '\'' represents a single quote (e.g: " ' ")
  * Like, every "valid escapes" character can be isloated this way.
- * Those are the double quote, backslash, Newline, Tab and null
+ * Those are the single && double quotes, backslash, Newline, Tab and null
  *
  * -> \', \", \\, \n, \t, \0
  *
@@ -79,7 +79,7 @@ char	*expand_double_quoted(const char *s, t_env **env)
 	while (s[i])
 	{
 		if (s[i] == '\\' && (s[i + 1] == '$'
-			|| s[i + 1] == '"' || s[i + 1] == '\\'))
+				|| s[i + 1] == '"' || s[i + 1] == '\\'))
 		{
 			tmp = ft_substr(s, i + 1, 1);
 			result = ft_strjoin_free(result, tmp);

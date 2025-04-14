@@ -15,7 +15,7 @@
 int	is_operator(char c)
 {
 	return (c == '>' || c == '<' || c == ';'
-		|| c == '&' || c == '(' || c == ')');
+		|| c == '&' || c == '(' || c == ')' || c == '|');
 }
 
 /*
@@ -26,6 +26,7 @@ t_token	*tokenize(char *input)
 {
 	t_token	*tokens;
 	int		i;
+	int		j;
 	int		pos;
 	int		start;
 
@@ -95,6 +96,9 @@ t_token	*tokenize(char *input)
 			while (input[pos] && !ft_isspace(input[pos])
 				&& !is_operator(input[pos]))
 				pos++;
+			j = pos;
+			while (input[j] && ft_isspace(intput[j]))
+				j++;
 			tokens[i++] = (t_token){WORD, ft_substr(input, start, pos - start)};
 		}
 	}

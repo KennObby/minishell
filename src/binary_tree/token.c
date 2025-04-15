@@ -12,12 +12,27 @@
 
 #include "../../inc/minishell.h"
 
-int	is_operator(char c)
+t_token	create_token(t_type type, const char *val)
 {
-	return (c == '>' || c == '<' || c == ';'
-		|| c == '&' || c == '(' || c == ')' || c == '|');
+	t_token	token;
+
+	token.type = type;
+	token.value = ft_strdup(val);
+	return (token);
 }
 
+int	tokenize_word(char *input, t_token *tokens, int i, int *pos)
+{
+	int	start;
+
+	start = *pos;
+	while (input[*pos] && !ft_isspace(input[*pos])
+		&& !is_operator(input[*pos]))
+		(*pos)++;
+	tokens[i] = create_token(WORD, ft_substr(input, start, *pos - start));
+	tokens[i].has_no_space_after = has_no_space_after(input, *pos);
+	return (i + 1);
+}
 /*
  * Tokenizer based on struct t_type. 
  * 
@@ -26,82 +41,81 @@ t_token	*tokenize(char *input)
 {
 	t_token	*tokens;
 	int		i;
-	int		j;
 	int		pos;
-	int		start;
 
-	tokens = malloc(MAX_TOKENS * sizeof(t_token));
+	tokens = ft_calloc(MAX_TOKENS, sizeof(t_token));
 	i = 0;
 	pos = 0;
-	while (input[pos])
+	while (input[pos] && i < MAX_TOKENS - 1)
 	{
 		if (ft_isspace(input[pos]))
 		{
 			pos++;
 			continue ;
 		}
-		start = pos;
-		if (ft_strncmp(&input[pos], ">>", 2) == 0)
-		{
-			tokens[i++] = (t_token){APPEND, ft_strdup(">>")};
-			pos += 2;
-		}
-		else if (ft_strncmp(&input[pos], "<<", 2) == 0)
-		{
-			tokens[i++] = (t_token){HEREDOC, ft_strdup("<<")};
-			pos += 2;
-		}
-		else if (ft_strncmp(&input[pos], "&&", 2) == 0)
-		{
-			tokens[i++] = (t_token){LOGICAL_AND, ft_strdup("&&")};
-			pos += 2;
-		}
-		else if (ft_strncmp(&input[pos], "||", 2) == 0)
-		{
-			tokens[i++] = (t_token){LOGICAL_OR, ft_strdup("||")};
-			pos += 2;
-		}
-		else if (input[pos] == '>')
-		{
-			tokens[i++] = (t_token){REDIRECT_OUT, ft_strdup(">")};
-			pos++;
-		}
-		else if (input[pos] == '<')
-		{
-			tokens[i++] = (t_token){REDIRECT_IN, ft_strdup("<")};
-			pos++;
-		}
-		else if (input[pos] == '|')
-		{
-			tokens[i++] = (t_token){PIPE, ft_strdup("|")};
-			pos++;
-		}
-		else if (input[pos] == ';')
-		{
-			tokens[i++] = (t_token){SEMICOLON, ft_strdup("")};
-			pos++;
-		}
-		else if (input[pos] == '(')
-		{
-			tokens[i++] = (t_token){GROUPING_OPEN, ft_strdup("(")};
-			pos++;
-		}
-		else if (input[pos] == ')')
-		{
-			tokens[i++] = (t_token){GROUPING_CLOSE, ft_strdup(")")};
-			pos++;
-		}
+		if (is_operator(input[pos]))
+			i = tokenize_operators(input, tokens, i, &pos);
 		else
-		{
-			while (input[pos] && !ft_isspace(input[pos])
-				&& !is_operator(input[pos]))
-				pos++;
-			j = pos;
-			while (input[j] && ft_isspace(intput[j]))
-				j++;
-			tokens[i++] = (t_token){WORD, ft_substr(input, start, pos - start)};
-		}
+			i = tokenize_word(input, tokens, i, &pos);
 	}
-	tokens[i] = (t_token){END, NULL};
+	tokens[i] = (t_token){END, NULL, false};
+	tokens[i + 1] = (t_token){0};
 	return (tokens);
+}
+
+int	tokenize_operators(char *input, t_token *tokens, int i, int *pos)
+{
+	if (ft_strncmp(&input[*pos], ">>", 2) == 0)
+	{
+		tokens[i++] = create_token(APPEND, ">>");
+		*pos += 2;
+	}
+	else if (ft_strncmp(&input[*pos], "<<", 2) == 0)
+	{
+		tokens[i++] = create_token(HEREDOC, "<<");
+		*pos += 2;
+	}
+	else if (ft_strncmp(&input[*pos], "&&", 2) == 0)
+	{
+		tokens[i++] = create_token(LOGICAL_AND, "&&");
+		*pos += 2;
+	}
+	else if (ft_strncmp(&input[*pos], "||", 2) == 0)
+	{
+		tokens[i++] = create_token(LOGICAL_OR, "||");
+		*pos += 2;
+	}
+	else if (input[*pos] == '>')
+	{
+		tokens[i++] = create_token(REDIRECT_OUT, ">");
+		(*pos)++;
+	}
+	else if (input[*pos] == '<')
+	{
+		tokens[i++] = create_token(REDIRECT_IN, "<");
+		(*pos)++;
+	}
+	else if (input[*pos] == '|')
+	{
+		tokens[i++] = create_token(PIPE, "|");
+		(*pos)++;
+	}
+	else if (input[*pos] == ';')
+	{
+		tokens[i++] = create_token(SEMICOLON, ";");
+		(*pos)++;
+	}
+	else if (input[*pos] == '(')
+	{
+		tokens[i++] = create_token(GROUPING_OPEN, "(");
+		(*pos)++;
+	}
+	else if (input[*pos] == ')')
+	{
+		tokens[i++] = create_token(GROUPING_CLOSE, ")");
+		(*pos)++;
+	}
+	else
+		return (i);
+	return (i);
 }

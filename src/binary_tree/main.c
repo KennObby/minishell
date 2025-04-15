@@ -29,6 +29,11 @@ void	print_tree(t_node *node, int depth)
 		ft_printf(" ");
 		i++;
 	}
+	if (node->type == SEMICOLON)
+	{
+		print_tree(node->writer, depth + 4);
+		print_tree(node->reader, depth + 4);
+	}
 	if (node->type == CMD)
 	{
 		ft_printf("CMD: ");
@@ -87,12 +92,12 @@ char	*built_prompt(t_env *env)
  */
 int	main(int ac, char **av, char **envp)
 {
-	char		*rl;
+	char		*input;
 	char		*prompt;
 	t_token		*tokens;
-	t_parser	parser;
-	t_node		*ast;
 	t_env		*env_list;
+	t_node		*root;
+	t_parser	parser;
 
 	(void)ac;
 	(void)av;
@@ -101,22 +106,28 @@ int	main(int ac, char **av, char **envp)
 	while (1)
 	{
 		prompt = built_prompt(env_list);
-		rl = readline(prompt);
+		input = readline(prompt);
 		free(prompt);
-		if (!rl)
+		if (!input)
 			break ;
-		if (ft_strlen(rl) > 0)
-			add_history(rl);
-		tokens = tokenize(rl);
+		if (ft_strlen(input))
+			add_history(input);
+		tokens = tokenize(input);
+		free(input);
+		if (!tokens)
+			continue ;
 		parser = (t_parser){tokens, 0};
-		ast = parse(&parser);
-		//print_tree(ast, 0);
-		prepare_heredocs(ast);
-		execute(ast, &env_list);
-		free_tree(ast);
+		root = parse(&parser);
+		//print_tree(root, 0);
+		prepare_heredocs(root);
+		if (root)
+		{
+			execute(root, &env_list);
+			free_tree(root);
+		}
 		free_tokens(tokens);
-		free(rl);
 	}
 	free_env_list(env_list);
+	rl_clear_history();
 	return (0);
 }

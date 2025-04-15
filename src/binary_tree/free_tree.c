@@ -53,3 +53,18 @@ void	free_tokens(t_token	*tokens)
 	}
 	free(tokens);
 }
+
+void	free_args(char **args, int count)
+{
+	int	i;
+
+	if (!args)
+		return ;
+	i = 0;
+	while (i < count)
+	{
+		free(args[i]);
+		i++;
+	}
+	free(args);
+}

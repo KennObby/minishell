@@ -10,6 +10,7 @@ SRCS =  src/binary_tree/bt_parser.c				\
 		src/binary_tree/to_str_helper.c 		\
 		src/binary_tree/exec_ops.c 				\
 		src/binary_tree/exec_mgmt.c 			\
+		src/binary_tree/exec_utils.c 			\
 		src/builtins/builtin_mgmt.c 			\
 		src/builtins/env/env_mgmt.c 			\
 		src/builtins/env/env_init.c 			\

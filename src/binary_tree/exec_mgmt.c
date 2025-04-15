@@ -18,12 +18,23 @@
 
 int	execute(t_node *node, t_env **env)
 {
+	int	status;
+
 	if (!node)
-		return (0);
+	{
+		ft_putendl_fd("minishell: NULL command node", 2);
+		return (127);
+	}
 	if (node->type == CMD)
 	{
 		if (is_parent_only_builtin(node->args[0]))
-			return (execute_is_parent_only_builtin(node, env));
+		{
+			status = execute_is_parent_only_builtin(node, env);
+			printf("Freeing node before execute: %p\n", node);
+			free_tree(node);
+			printf("Freeing node after execute: %p\n", node);
+			return (status);
+		}
 		else if (is_forkable_builtin(node->args[0]))
 			return (execute_forked_builtin(node, env));
 		else
@@ -49,7 +60,7 @@ int	execute_is_parent_only_builtin(t_node *cmd, t_env **env)
 	if (handle_redirections(cmd) != 0)
 	{
 		dup2(saved_in, STDIN_FILENO);
-		dup2(saved_out, STDIN_FILENO);
+		dup2(saved_out, STDOUT_FILENO);
 		close(saved_in);
 		close(saved_out);
 		return (1);
@@ -117,18 +128,17 @@ int	handle_heredoc(char *delimiter)
 		perror("minishell");
 		return (-1);
 	}
+	signal(SIGINT, heredoc_sig_handler);
 	while (1)
 	{
 		line = readline(">");
 		if (!line || ft_strcmp(line, delimiter) == 0)
-		{
-			write(1, "\n", 1);
 			break ;
-		}
 		write(pipefd[1], line, ft_strlen(line));
 		write(pipefd[1], "\n", 1);
 		free(line);
 	}
+	signal(SIGINT, SIG_DFL);
 	if (line)
 		free(line);
 	close(pipefd[1]);

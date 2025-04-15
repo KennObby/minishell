@@ -34,21 +34,28 @@ int	execute_cmd(t_node *cmd, t_env *env_list)
 		if (handle_redirections(cmd) != 0)
 			exit(1);
 		envp = env_list_to_array(env_list);
+		if (!cmd || !cmd->args || !cmd->args[0])
+		{
+			ft_printf("minishell: invalid command");
+			exit(127);
+		}
 		if (ft_strchr(cmd->args[0], '/'))
 		{
 			if (access(cmd->args[0], X_OK) == 0)
 				execve(cmd->args[0], cmd->args, envp);
-			ft_printf("minishell: %s: command not found\n", cmd->args[0]);
+			ft_printf("bash: %s: command not found\n", cmd->args[0]);
 			exit(127);
 		}
 		cmd_path = resolve_path(cmd->args[0], env_list);
 		if (!cmd_path)
 		{
-			ft_printf("minishell: %s: command not found\n", cmd->args[0]);
+			ft_printf("bash: %s: command not found\n", cmd->args[0]);
 			exit(127);
 		}
 		execve(cmd_path, cmd->args, envp);
-		ft_printf("minishell: failed to exec: %s\n", cmd_path);
+		ft_printf("bash: command not found: %s\n", cmd_path);
+		free(cmd_path);
+		free_str_array(envp);
 		exit(1);
 	}
 	waitpid(pid, &status, 0);
@@ -90,10 +97,7 @@ int	execute_pipe(t_node *pipe_node, t_env *env)
 	close(fd[1]);
 	waitpid(pid_left, NULL, 0);
 	waitpid(pid_right, &status, 0);
-	if (WIFEXITED(status))
-		return (WEXITSTATUS(status));
-	else
-		return (1);
+	return (WEXITSTATUS(status));
 }
 
 int	execute_logical(t_node *logical_node, t_env *env)
@@ -140,8 +144,8 @@ int	handle_redirections(t_node *cmd)
 			fd = cmd->redirs[i].fd;
 		if (fd == -1)
 		{
-			perror("minishell");
-			return (-1);
+			ft_printf("bash: %s: No such file or directory", cmd->args[0]);
+			exit (126);
 		}
 		if (cmd->redirs[i].type == REDIRECT_IN
 			|| cmd->redirs[i].type == HEREDOC)

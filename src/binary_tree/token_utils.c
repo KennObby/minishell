@@ -13,9 +13,26 @@
 #include "../../inc/minishell.h"
 #include <stdbool.h>
 
-bool	has_no_space_after(char *input, int pos)
+/*
+ * The function checks if there is no space after the token
+ */
+bool	has_no_space_after(const char *input, int pos)
 {
-	while (input[pos] && ft_isspace(input[pos]))
-		pos++;
-	return (input[pos] && !is_operator(input[pos]));
+	return (input[pos] && !ft_isspace(input[pos]));
+}
+
+int	is_operator(char c)
+{
+	return (c == '>' || c == '<' || c == ';'
+		|| c == '&' || c == '(' || c == ')' || c == '|');
+}
+
+/*
+ * Checks if both tokens are WORD types and the following 
+ * token has no spaces after it by keeping in memory the
+ * end position of the previous token
+ */
+bool	should_merge(t_token prev, t_token next)
+{
+	return (prev.has_no_space_after && next.type == WORD);
 }

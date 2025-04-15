@@ -169,21 +169,26 @@ t_node		*parse(t_parser *parser);
 //< --------------------------- bt_parser.c ------------------- >
 t_node		*parse_semicolon(t_parser *parser);
 t_node		*parse_logical(t_parser *parser);
-void		parse_redirects(t_parser *parser, t_node *cmd_node);
+int			parse_redirects(t_parser *parser, t_node *cmd_node);
 t_node		*parse_pipeline(t_parser *parser);
 t_node		*parse_command(t_parser *parser);
 t_node		*parse_grouping(t_parser *parser);
 
 //< --------------------------- token.c ----------------------- >
 int			is_operator(char c);
+int			tokenize_word(char *input, t_token *tokens, int i, int *pos);
 t_token		*tokenize(char *input);
+int			tokenize_operators(char *input, t_token *tokens, int i, int *pos);
 
 //< --------------------------- token_utils.c ----------------- >
-bool		has_no_space_after(char *input, int pos);
+int			is_operator(char c);
+bool		has_no_space_after(const char *input, int pos);
+bool		should_merge(t_token prev, t_token next);
 
 //< --------------------------- free_tree.c ------------------- >
 void		free_tree(t_node *node);
 void		free_tokens(t_token *tokens);
+void		free_args(char **args, int count);
 
 //< --------------------------- main.c ------------------------ >
 char		*build_prompt(t_env *env);
@@ -192,6 +197,9 @@ void		print_tree(t_node *node, int depth);
 //< --------------------------- to_str_helper.c --------------- >
 const char	*redir_type_str(t_type type);
 const char	*type_to_str(t_type type);
+
+//< --------------------------- exec_utils.c ------------------ >
+void		heredoc_sig_handler(int sig);
 
 //< --------------------------- exec_ops.c -------------------- >
 int			execute_cmd(t_node *cmd, t_env *env_list);
@@ -221,7 +229,7 @@ char		**env_list_to_array(t_env *env);
 
 //< --------------------------- free_env.c -------------------- >
 void		free_env_list(t_env *env);
-void		free_str_array(char **paths);
+void		free_str_array(char **arr);
 
 //< --------------------------- pwd.c ------------------------- >
 int			builtin_pwd(void);

@@ -23,6 +23,8 @@ t_node	*parse_semicolon(t_parser *parser)
 	{
 		consume(parser);
 		right = parse_semicolon(parser);
+		if (!right)
+			return (left);
 		return (create_node(SEMICOLON, left, right));
 	}
 	return (left);
@@ -62,50 +64,86 @@ t_node	*parse_pipeline(t_parser *parser)
 
 /*
  * 1. Collecting commands by allocating based on MAX_ARGS size
- * 2. Collecitng tokens until an operator is found
+ * 2. Collecting tokens until an operator is found
  * 3. Creating a leaf based on that node
  * 4. Attach redirections if any
+ *
+ * UPDATE: Adding the should_merge func()
+ * The main idea is to detect that two tokens should be merged
+ * if its the case, we join them 
+ * (e.g echo "$HO''ME" -> $HOME)
  */
 t_node	*parse_command(t_parser *parser)
 {
-	char	**args;
-	int		arg_count;
-	t_node	*cmd_node;
-	char	*merged;
-	char	*tmp;
+	char		**args;
+	int			arg_count;
+	char		*merged;
+	char		**new_args;
+	t_node		*cmd_node;
+	char		*tmp;
 
-	args = malloc(MAX_ARGS * sizeof(char *));
-	if (!args)
-		return (NULL);
 	arg_count = 0;
+	args = NULL;
 	while (parser->pos < MAX_TOKENS
 		&& parser->tokens[parser->pos].type == WORD)
 	{
 		merged = ft_strdup(parser->tokens[parser->pos].value);
+		if (!merged)
+		{
+			free_args(args, arg_count);
+			return (NULL);
+		}
 		parser->pos++;
 		while (parser->pos < MAX_TOKENS
-			&& parser->tokens[parser->pos].type == WORD)
+			&& should_merge(parser->tokens[parser->pos - 1],
+				parser->tokens[parser->pos]))
 		{
 			tmp = merged;
 			merged = ft_strjoin(merged, parser->tokens[parser->pos].value);
 			free(tmp);
 			if (!merged)
+			{
+				free_args(args, arg_count);
 				return (NULL);
+			}
 			parser->pos++;
 		}
+		new_args = ft_realloc(args, arg_count * sizeof(char *),
+				(arg_count + 1) * sizeof(char *));
+		if (!new_args)
+		{
+			free(merged);
+			free_args(args, arg_count);
+			return (NULL);
+		}
+		args = new_args;
 		args[arg_count++] = merged;
 	}
+	new_args = ft_realloc(args, arg_count * sizeof(char *),
+			(arg_count + 1) * sizeof(char *));
+	if (!new_args)
+	{
+		free_args(args, arg_count);
+		return (NULL);
+	}
+	args = new_args;
 	args[arg_count] = NULL;
 	if (arg_count == 0 && !is_redirection(peek(parser)))
 	{
+		ft_printf("bash: syntax error near unexpected token `%s`\n",
+			parser->tokens[parser->pos].value);
+		parser->pos = MAX_TOKENS;
 		free(args);
-		ft_printf("minishell: invalid command\n");
 		return (NULL);
 	}
 	cmd_node = create_leaf(args);
 	if (!cmd_node)
 		return (NULL);
-	parse_redirects(parser, cmd_node);
+	if (!parse_redirects(parser, cmd_node))
+	{
+		free_tree(cmd_node);
+		return (NULL);
+	}
 	return (cmd_node);
 }
 
@@ -115,7 +153,7 @@ t_node	*parse_command(t_parser *parser)
  * 4. Ajout de la comande de redirection
  * !! Creer une fct handle_error qui "free??" au peek + if (!new_redirs)
  */
-void	parse_redirects(t_parser *parser, t_node *cmd_node)
+int	parse_redirects(t_parser *parser, t_node *cmd_node)
 {
 	t_redir	redir;
 	t_redir	*new_redirs;
@@ -126,10 +164,10 @@ void	parse_redirects(t_parser *parser, t_node *cmd_node)
 		parser->pos++;
 		if (parser->pos >= MAX_TOKENS || peek(parser) != WORD)
 		{
-			free_tree(cmd_node);
-			ft_printf("Missing filename for redirection");
+			ft_printf("bash: syntax error near unexpected token `%s`\n",
+				parser->tokens[parser->pos].value);
 			parser->pos = MAX_TOKENS;
-			return ;
+			return (0);
 		}
 		redir.filename = ft_strdup(parser->tokens[parser->pos].value);
 		parser->pos++;
@@ -138,12 +176,14 @@ void	parse_redirects(t_parser *parser, t_node *cmd_node)
 				(cmd_node->redir_count + 1) * sizeof(t_redir));
 		if (!new_redirs)
 		{
-			free_tree(cmd_node);
-			exit(1);
+			free(redir.filename);
+			parser->pos = MAX_TOKENS;
+			return (0);
 		}
 		cmd_node->redirs = new_redirs;
 		cmd_node->redirs[cmd_node->redir_count++] = redir;
 	}
+	return (1);
 }
 
 t_node	*parse_grouping(t_parser *parser)
@@ -157,7 +197,6 @@ t_node	*parse_grouping(t_parser *parser)
 		if (peek(parser) != GROUPING_CLOSE)
 		{
 			ft_printf("Syntax error: unclosed grouping");
-			parser->pos = MAX_TOKENS;
 			return (NULL);
 		}
 		consume(parser);

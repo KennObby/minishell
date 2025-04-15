@@ -16,14 +16,11 @@ const char	*redir_type_str(t_type type)
 {
 	const char	*redir_str[NB_TYPES];
 
-	//redir_str = {0};
-	if (redir_str[0] == NULL)
-	{
-		redir_str[REDIRECT_IN] = "<";
-		redir_str[REDIRECT_OUT] = ">";
-		redir_str[APPEND] = ">>";
-		redir_str[HEREDOC] = "<<";
-	}
+	ft_memset(redir_str, 0, sizeof(redir_str));
+	redir_str[REDIRECT_IN] = "<";
+	redir_str[REDIRECT_OUT] = ">";
+	redir_str[APPEND] = ">>";
+	redir_str[HEREDOC] = "<<";
 	if (type >= REDIRECT_IN && type <= HEREDOC)
 		return (redir_str[type]);
 	return ("UNKNOWN REDIR");
@@ -33,20 +30,17 @@ const char	*type_to_str(t_type type)
 {
 	const char	*type_str[NB_TYPES];
 
-	//type_str = {0};
-	if (type_str[0] == NULL)
-	{
-		type_str[CMD] = "CMD";
-		type_str[PIPE] = "|";
-		type_str[SEMICOLON] = ";";
-		type_str[LOGICAL_AND] = "&&";
-		type_str[LOGICAL_OR] = "||";
-		type_str[GROUPING] = "()";
-		type_str[REDIRECT_IN] = ">";
-		type_str[REDIRECT_OUT] = "<";
-		type_str[APPEND] = ">>";
-		type_str[HEREDOC] = "<<";
-	}
+	ft_memset(type_str, 0, sizeof(type_str));
+	type_str[CMD] = "CMD";
+	type_str[PIPE] = "|";
+	type_str[SEMICOLON] = ";";
+	type_str[LOGICAL_AND] = "&&";
+	type_str[LOGICAL_OR] = "||";
+	type_str[GROUPING] = "()";
+	type_str[REDIRECT_IN] = ">";
+	type_str[REDIRECT_OUT] = "<";
+	type_str[APPEND] = ">>";
+	type_str[HEREDOC] = "<<";
 	if (type >= CMD && type <= HEREDOC && type_str[type])
 		return (type_str[type]);
 	return ("UNKNOWN TYPE");

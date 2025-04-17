@@ -153,6 +153,7 @@ typedef struct s_node
 # define MAX_TOKENS 1024
 # define MAX_ARGS 1024
 # define MAX_PATH 1024
+# define EXPECT_CMD_START (t_type[]){WORD, GROUPING_OPEN}
 //< --------------------------- FUNCTIONS --------------------- >
 //
 //< --------------------------- BINARY TREE ------------------- >
@@ -164,7 +165,10 @@ t_node		*create_node(t_type type, t_node *left, t_node *right);
 t_type		peek(t_parser *parser);
 void		consume(t_parser *parser);
 int			is_redirection(t_type type);
+void		print_syntax_error(t_parser *parser);
 t_node		*parse(t_parser *parser);
+bool		expect_valid_token(t_parser *parser, t_type *expected, int count);
+bool		expect_token_and_consume(t_parser *parser, t_type expected);
 
 //< --------------------------- bt_parser.c ------------------- >
 t_node		*parse_semicolon(t_parser *parser);
@@ -176,6 +180,7 @@ t_node		*parse_grouping(t_parser *parser);
 
 //< --------------------------- token.c ----------------------- >
 int			is_operator(char c);
+t_token		create_token(t_type type, char *val);
 int			tokenize_word(char *input, t_token *tokens, int i, int *pos);
 t_token		*tokenize(char *input);
 int			tokenize_operators(char *input, t_token *tokens, int i, int *pos);

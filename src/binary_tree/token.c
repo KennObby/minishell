@@ -12,12 +12,12 @@
 
 #include "../../inc/minishell.h"
 
-t_token	create_token(t_type type, const char *val)
+t_token	create_token(t_type type, char *val)
 {
 	t_token	token;
 
 	token.type = type;
-	token.value = ft_strdup(val);
+	token.value = val;
 	return (token);
 }
 
@@ -60,6 +60,9 @@ t_token	*tokenize(char *input)
 	}
 	tokens[i] = (t_token){END, NULL, false};
 	tokens[i + 1] = (t_token){0};
+	for (int i = 0; tokens[i].type != END; i++)
+		ft_printf("Token[%d]: type=%d value='%s'\n", i, tokens[i].type, tokens[i].value);
+
 	return (tokens);
 }
 
@@ -67,52 +70,52 @@ int	tokenize_operators(char *input, t_token *tokens, int i, int *pos)
 {
 	if (ft_strncmp(&input[*pos], ">>", 2) == 0)
 	{
-		tokens[i++] = create_token(APPEND, ">>");
+		tokens[i++] = create_token(APPEND, ft_strdup(">>"));
 		*pos += 2;
 	}
 	else if (ft_strncmp(&input[*pos], "<<", 2) == 0)
 	{
-		tokens[i++] = create_token(HEREDOC, "<<");
+		tokens[i++] = create_token(HEREDOC, ft_strdup("<<"));
 		*pos += 2;
 	}
 	else if (ft_strncmp(&input[*pos], "&&", 2) == 0)
 	{
-		tokens[i++] = create_token(LOGICAL_AND, "&&");
+		tokens[i++] = create_token(LOGICAL_AND, ft_strdup("&&"));
 		*pos += 2;
 	}
 	else if (ft_strncmp(&input[*pos], "||", 2) == 0)
 	{
-		tokens[i++] = create_token(LOGICAL_OR, "||");
+		tokens[i++] = create_token(LOGICAL_OR, ft_strdup("||"));
 		*pos += 2;
 	}
 	else if (input[*pos] == '>')
 	{
-		tokens[i++] = create_token(REDIRECT_OUT, ">");
+		tokens[i++] = create_token(REDIRECT_OUT, ft_strdup(">"));
 		(*pos)++;
 	}
 	else if (input[*pos] == '<')
 	{
-		tokens[i++] = create_token(REDIRECT_IN, "<");
+		tokens[i++] = create_token(REDIRECT_IN, ft_strdup("<"));
 		(*pos)++;
 	}
 	else if (input[*pos] == '|')
 	{
-		tokens[i++] = create_token(PIPE, "|");
+		tokens[i++] = create_token(PIPE, ft_strdup("|"));
 		(*pos)++;
 	}
 	else if (input[*pos] == ';')
 	{
-		tokens[i++] = create_token(SEMICOLON, ";");
+		tokens[i++] = create_token(SEMICOLON, ft_strdup(";"));
 		(*pos)++;
 	}
 	else if (input[*pos] == '(')
 	{
-		tokens[i++] = create_token(GROUPING_OPEN, "(");
+		tokens[i++] = create_token(GROUPING_OPEN, ft_strdup("("));
 		(*pos)++;
 	}
 	else if (input[*pos] == ')')
 	{
-		tokens[i++] = create_token(GROUPING_CLOSE, ")");
+		tokens[i++] = create_token(GROUPING_CLOSE, ft_strdup(")"));
 		(*pos)++;
 	}
 	else

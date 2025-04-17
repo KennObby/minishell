@@ -14,6 +14,8 @@
 
 t_type	peek(t_parser *parser)
 {
+	if (parser->pos >= MAX_TOKENS)
+		return (END);
 	return (parser->tokens[parser->pos].type);
 }
 
@@ -28,7 +30,43 @@ int	is_redirection(t_type type)
 		|| type == APPEND || type == HEREDOC);
 }
 
-t_node	*parse(t_parser *parser)
+void	print_syntax_error(t_parser *parser)
 {
-	return (parse_semicolon(parser));
+	const char	*token_val;
+
+	if (peek(parser) == END || !parser->tokens[parser->pos].value)
+		token_val = "newline";
+	else
+		token_val = parser->tokens[parser->pos].value;
+	ft_printf("bash: syntax error near unexpected token `%s'\n", token_val);
+}
+
+bool	expect_valid_token(t_parser *parser, t_type *expected, int count)
+{
+	t_type	current;
+	int		i;
+
+	current = peek(parser);
+	i = 0;
+	while (i < count)
+	{
+		if (current == expected[i])
+			return (true);
+		i++;
+	}
+	print_syntax_error(parser);
+	parser->pos = MAX_TOKENS;
+	return (false);
+}
+
+bool	expect_token_and_consume(t_parser *parser, t_type expected)
+{
+	if (peek(parser) != expected)
+	{
+		print_syntax_error(parser);
+		parser->pos = MAX_TOKENS;
+		return (false);
+	}
+	consume(parser);
+	return (true);
 }

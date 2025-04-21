@@ -18,6 +18,9 @@ char	*handle_cd_path(t_node *cmd, t_env **env)
 {
 	char	*path;
 	int		count;
+	char	*home;
+	char	*suffix;
+	char	*expanded;
 
 	count = 0;
 	while (cmd->args[count])
@@ -35,8 +38,9 @@ char	*handle_cd_path(t_node *cmd, t_env **env)
 			ft_printf("cd: HOME not set\n");
 			return (NULL);
 		}
+		return (ft_strdup(path));
 	}
-	else if (ft_strcmp(cmd->args[1], "-") == 0)
+	if (ft_strcmp(cmd->args[1], "-") == 0)
 	{
 		path = get_env_value(*env, "OLDPWD");
 		if (!path)
@@ -45,10 +49,21 @@ char	*handle_cd_path(t_node *cmd, t_env **env)
 			return (NULL);
 		}
 		ft_printf("%s\n", path);
+		return (ft_strdup(path));
 	}
-	else
-		path = cmd->args[1];
-	return (path);
+	if (cmd->args[1][0] == '~')
+	{
+		home = get_env_value(*env, "HOME");
+		if (!home)
+		{
+			ft_printf("cd: HOME not set");
+			return (NULL);
+		}
+		suffix = cmd->args[1] + 1;
+		expanded = ft_strjoin(home, suffix);
+		return (expanded);
+	}
+	return (ft_strdup(cmd->args[1]));
 }
 
 int	builtin_cd(t_node *cmd, t_env **env)
@@ -64,12 +79,14 @@ int	builtin_cd(t_node *cmd, t_env **env)
 	{
 		ft_printf("cd: %s: ", target);
 		perror("");
+		free(target);
 		return (1);
 	}
 	old_pwd = get_env_value(*env, "PWD");
 	if (!getcwd(cwd, sizeof(cwd)))
 	{
 		ft_printf("cd: error retrieving current directory");
+		free(target);
 		return (1);
 	}
 	if (old_pwd)

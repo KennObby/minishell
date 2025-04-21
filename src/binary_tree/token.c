@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
+#include <stdbool.h>
 
 t_token	create_token(t_type type, char *val)
 {
@@ -18,18 +19,23 @@ t_token	create_token(t_type type, char *val)
 
 	token.type = type;
 	token.value = val;
+	token.has_no_space_after = false;
+	token.env_list = NULL;
+	token.input = NULL;
 	return (token);
 }
 
 int	tokenize_word(char *input, t_token *tokens, int i, int *pos)
 {
-	int	start;
+	int		start;
+	char	*value;
 
 	start = *pos;
 	while (input[*pos] && !ft_isspace(input[*pos])
 		&& !is_operator(input[*pos]))
 		(*pos)++;
-	tokens[i] = create_token(WORD, ft_substr(input, start, *pos - start));
+	value = ft_substr(input, start, *pos - start);
+	tokens[i] = create_token(WORD, value);
 	tokens[i].has_no_space_after = has_no_space_after(input, *pos);
 	return (i + 1);
 }
@@ -37,7 +43,7 @@ int	tokenize_word(char *input, t_token *tokens, int i, int *pos)
  * Tokenizer based on struct t_type. 
  * 
  */
-t_token	*tokenize(char *input)
+t_token	*tokenize(char *input, t_env *env)
 {
 	t_token	*tokens;
 	int		i;
@@ -58,11 +64,15 @@ t_token	*tokenize(char *input)
 		else
 			i = tokenize_word(input, tokens, i, &pos);
 	}
-	tokens[i] = (t_token){END, NULL, false};
+	tokens[i] = (t_token){END, NULL, false, env, input};
 	tokens[i + 1] = (t_token){0};
-	for (int i = 0; tokens[i].type != END; i++)
-		ft_printf("Token[%d]: type=%d value='%s'\n", i, tokens[i].type, tokens[i].value);
-
+	for (int j = 0; tokens[i].type != END; i++)
+	{
+		tokens[j].env_list = env;
+		tokens[j].input = input;
+		ft_printf("Token[%d]: type=%d value='%s'\n",
+			i, tokens[i].type, tokens[i].value);
+	}
 	return (tokens);
 }
 

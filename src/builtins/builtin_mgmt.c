@@ -37,6 +37,8 @@ int	builtin_echo(t_node *cmd, t_env **env)
 		else if (cmd->args[i][0] == '"' && ft_strlen(cmd->args[i]) > 1
 			&& cmd->args[i][ft_strlen(cmd->args[i]) - 1]== '"')
 			output = handle_double_quotes(cmd->args[i], env);
+		else if (ft_strcmp(cmd->args[i], "$?") == 0)
+			output = ft_itoa(g_status);
 		else if (ft_strchr(cmd->args[i], '$'))
 			output = expand_double_quoted(ft_strdup(cmd->args[i]), env);
 		else

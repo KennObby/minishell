@@ -32,6 +32,8 @@
 # include "../Libft/ft_printf.h"
 # include "../Libft/get_next_line_bonus.h"
 
+extern int	g_status;
+
 //< ----------------------- STRUCTS --------------------- >
 
 /* 
@@ -69,28 +71,6 @@ typedef enum e_type
 	NB_TYPES,
 }				t_type;
 
-/*
- * type = enum t_type
- * value = The actual string (e.g., "ls", "|")
- *
- */
-typedef struct s_token
-{
-	t_type	type;
-	char	*value;
-	bool	has_no_space_after;
-}				t_token;
-
-/*
- * binary tree parser, identifying nodes by recursively trying to follow 
- * precedence of POSIX bash operators (e.g "|", "<<", etc...)
- *
- */
-typedef struct s_parser
-{
-	t_token	*tokens;
-	int		pos;
-}				t_parser;
 
 /*
  * filename = stores regular redirs
@@ -116,6 +96,31 @@ typedef struct s_env
 	char			*value;
 	struct s_env	*next;
 }				t_env;
+
+/*
+ * type = enum t_type
+ * value = The actual string (e.g., "ls", "|")
+ *
+ */
+typedef struct s_token
+{
+	t_type	type;
+	char	*value;
+	bool	has_no_space_after;
+	t_env	*env_list;
+	char	*input;
+}				t_token;
+
+/*
+ * binary tree parser, identifying nodes by recursively trying to follow 
+ * precedence of POSIX bash operators (e.g "|", "<<", etc...)
+ *
+ */
+typedef struct s_parser
+{
+	t_token	*tokens;
+	int		pos;
+}				t_parser;
 
 /* 
  * In case we need to update PWD (pwd) and OLDPWD (called by cd -)
@@ -153,7 +158,6 @@ typedef struct s_node
 # define MAX_TOKENS 1024
 # define MAX_ARGS 1024
 # define MAX_PATH 1024
-# define EXPECT_CMD_START (t_type[]){WORD, GROUPING_OPEN}
 //< --------------------------- FUNCTIONS --------------------- >
 //
 //< --------------------------- BINARY TREE ------------------- >
@@ -182,7 +186,7 @@ t_node		*parse_grouping(t_parser *parser);
 int			is_operator(char c);
 t_token		create_token(t_type type, char *val);
 int			tokenize_word(char *input, t_token *tokens, int i, int *pos);
-t_token		*tokenize(char *input);
+t_token		*tokenize(char *input, t_env *env_list);
 int			tokenize_operators(char *input, t_token *tokens, int i, int *pos);
 
 //< --------------------------- token_utils.c ----------------- >
@@ -219,6 +223,12 @@ int			execute_forked_builtin(t_node *cmd, t_env **env);
 int			execute_is_parent_only_builtin(t_node *cmd, t_env **env);
 void		prepare_heredocs(t_node *node);
 int			handle_heredoc(char *delimiter);
+
+//< --------------------------- signal_handlers.c ------------- >
+void		sigint_handler(int sig);
+void		heredoc_sig_handler(int sig);
+void		setup_signals(void);
+void		reset_signals(void);
 
 //< --------------------------- BUILT-INS --------------------- >
 //< --------------------------- env_mgmt.c -------------------- >

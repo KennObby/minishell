@@ -30,9 +30,6 @@ int	execute(t_node *node, t_env **env)
 		if (is_parent_only_builtin(node->args[0]))
 		{
 			status = execute_is_parent_only_builtin(node, env);
-			printf("Freeing node before execute: %p\n", node);
-			free_tree(node);
-			printf("Freeing node after execute: %p\n", node);
 			return (status);
 		}
 		else if (is_forkable_builtin(node->args[0]))

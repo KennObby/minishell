@@ -108,8 +108,6 @@ t_node	*parse_grouping(t_parser *parser)
 		subtree = parse_semicolon(parser);
 		if (peek(parser) != GROUPING_CLOSE)
 		{
-			//print_syntax_error(parser);
-			//parser->pos = MAX_TOKENS;
 			prepare_heredocs(subtree);
 			return (subtree);
 		}

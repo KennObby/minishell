@@ -21,6 +21,7 @@ int	execute_cmd(t_node *cmd, t_env *env_list)
 	char	*cmd_path;
 	char	**envp;
 	int		status;
+	int		sig;
 	pid_t	pid;
 
 	pid = fork();
@@ -42,7 +43,10 @@ int	execute_cmd(t_node *cmd, t_env *env_list)
 		if (ft_strchr(cmd->args[0], '/'))
 		{
 			if (access(cmd->args[0], X_OK) == 0)
+			{
+				reset_signals();
 				execve(cmd->args[0], cmd->args, envp);
+			}
 			ft_printf("bash: %s: command not found\n", cmd->args[0]);
 			exit(127);
 		}
@@ -52,6 +56,7 @@ int	execute_cmd(t_node *cmd, t_env *env_list)
 			ft_printf("bash: %s: command not found\n", cmd->args[0]);
 			exit(127);
 		}
+		reset_signals();
 		execve(cmd_path, cmd->args, envp);
 		ft_printf("bash: command not found: %s\n", cmd_path);
 		free(cmd_path);
@@ -61,6 +66,15 @@ int	execute_cmd(t_node *cmd, t_env *env_list)
 	waitpid(pid, &status, 0);
 	if (WIFEXITED(status))
 		return (WEXITSTATUS(status));
+	else if (WIFSIGNALED(status))
+	{
+		sig = WTERMSIG(status);
+		if (sig == SIGQUIT)
+			ft_putstr_fd("Quit: 3\n", 2);
+		else if (sig == SIGINT)
+			ft_putchar_fd('\n', 2);
+		return (128 + sig);
+	}
 	return (1);
 }
 
@@ -114,7 +128,10 @@ int	execute_logical(t_node *logical_node, t_env *env)
 
 int	execute_semicolon(t_node *semi_node, t_env *env)
 {
-	execute(semi_node->writer, &env);
+	int	left_status;
+
+	left_status = execute(semi_node->writer, &env);
+	(void)left_status;
 	return (execute(semi_node->reader, &env));
 }
 

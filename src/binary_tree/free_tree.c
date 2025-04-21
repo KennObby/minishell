@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
+#include <string.h>
 
 void	free_tree(t_node *node)
 {
@@ -21,7 +22,7 @@ void	free_tree(t_node *node)
 		return ;
 	free_tree(node->writer);
 	free_tree(node->reader);
-	if (node->type == CMD)
+	if (node->args)
 	{
 		i = 0;
 		while (node->args[i])
@@ -30,14 +31,20 @@ void	free_tree(t_node *node)
 			i++;
 		}
 		free(node->args);
+		node->args = NULL;
 	}
-	i = 0;
-	while (i < node->redir_count)
+	if (node->redirs)
 	{
-		free(node->redirs[i].filename);
-		i++;
+		i = 0;
+		while (i < node->redir_count)
+		{
+			free(node->redirs[i].filename);
+			node->redirs[i].filename = NULL;
+			i++;
+		}
+		free(node->redirs);
+		node->redirs = NULL;
 	}
-	free(node->redirs);
 	free(node);
 }
 

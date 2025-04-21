@@ -15,6 +15,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+int	g_status = 0;
+
 void	print_tree(t_node *node, int depth)
 {
 	int	i;
@@ -106,13 +108,18 @@ int	main(int ac, char **av, char **envp)
 	while (1)
 	{
 		prompt = built_prompt(env_list);
+		setup_signals();
+		signal(SIGQUIT, SIG_IGN);
 		input = readline(prompt);
 		free(prompt);
 		if (!input)
+		{
+			ft_putendl_fd("exit", 1);
 			break ;
+		}
 		if (ft_strlen(input))
 			add_history(input);
-		tokens = tokenize(input);
+		tokens = tokenize(input, env_list);
 		free(input);
 		if (!tokens)
 			continue ;
@@ -121,13 +128,11 @@ int	main(int ac, char **av, char **envp)
 		//print_tree(root, 0);
 		prepare_heredocs(root);
 		if (root)
-		{
-			execute(root, &env_list);
-			free_tree(root);
-		}
+			g_status = execute(root, &env_list);
+		free_tree(root);
 		free_tokens(tokens);
 	}
 	free_env_list(env_list);
 	rl_clear_history();
-	return (0);
+	return (g_status);
 }

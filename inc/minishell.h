@@ -195,6 +195,7 @@ int			tokenize_operators(char *input, t_token *tokens, int i, int *pos);
 //< --------------------------- token_utils.c ----------------- >
 int			is_operator(char c);
 bool		has_no_space_after(const char *input, int pos);
+int			is_control_token(t_type type);
 bool		should_merge(t_token prev, t_token next);
 
 //< --------------------------- free_tree.c ------------------- >

@@ -21,7 +21,9 @@ static char	**collect_args(t_parser *parser, int *arg_count)
 
 	args = NULL;
 	*arg_count = 0;
-	while (parser->pos < MAX_TOKENS && parser->tokens[parser->pos].type == WORD)
+	while (parser->pos < MAX_TOKENS
+		&& parser->tokens[parser->pos].type == WORD
+		&& !is_control_token(parser->tokens[parser->pos].type))
 	{
 		merged = ft_strdup(parser->tokens[parser->pos++].value);
 		if (!merged)

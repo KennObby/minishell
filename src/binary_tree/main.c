@@ -125,7 +125,7 @@ int	main(int ac, char **av, char **envp)
 			continue ;
 		parser = (t_parser){tokens, 0};
 		root = parse(&parser);
-		//print_tree(root, 0);
+		print_tree(root, 0);
 		if (root)
 		{
 			expand_node_args(root, env_list);

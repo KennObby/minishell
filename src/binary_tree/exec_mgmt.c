@@ -12,6 +12,7 @@
 
 #include "../../inc/minishell.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -119,25 +120,40 @@ int	handle_heredoc(char *delimiter)
 {
 	char	*line;
 	int		pipefd[2];
+	int		status;
+	pid_t	pid;
 
 	if (pipe(pipefd) == -1)
 	{
 		perror("minishell");
 		return (-1);
 	}
-	signal(SIGINT, heredoc_sig_handler);
-	while (1)
+	pid = fork();
+	if (pid < 0)
 	{
-		line = readline(">");
-		if (!line || ft_strcmp(line, delimiter) == 0)
-			break ;
-		write(pipefd[1], line, ft_strlen(line));
-		write(pipefd[1], "\n", 1);
-		free(line);
+		perror("fork");
+		return (-1);
 	}
-	signal(SIGINT, SIG_DFL);
-	if (line)
+	if (pid == 0)
+	{
+		signal(SIGINT, heredoc_sig_handler);
+		close(pipefd[0]);
+		while (1)
+		{
+			line = readline(">");
+			if (!line || ft_strcmp(line, delimiter) == 0)
+				break ;
+			write(pipefd[1], line, ft_strlen(line));
+			write(pipefd[1], "\n", 1);
+			free(line);
+		}
 		free(line);
+		close(pipefd[1]);
+		exit(0);
+	}
 	close(pipefd[1]);
+	waitpid(pid, &status, 0);
+	if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+		return (-1);
 	return (pipefd[0]);
 }

@@ -34,9 +34,6 @@ int	parse_redirects(t_parser *parser, t_node *cmd_node)
 {
 	t_redir		redir;
 
-	ft_printf("Entering parse_redirects at token[%d]: type=%d, value='%s'\n",
-    parser->pos, parser->tokens[parser->pos].type,
-    parser->tokens[parser->pos].value ? parser->tokens[parser->pos].value : "NULL");
 	while (is_redirection(peek(parser)))
 	{
 		redir.type = parser->tokens[parser->pos].type;
@@ -46,9 +43,6 @@ int	parse_redirects(t_parser *parser, t_node *cmd_node)
 			print_syntax_error(parser);
 			return (0);
 		}
-		ft_printf("Checking WORD after redirect at token[%d]: type=%d, value='%s'\n",
-    	parser->pos, peek(parser),
-    	parser->tokens[parser->pos].value ? parser->tokens[parser->pos].value : "NULL");
 		if (peek(parser) != WORD)
 		{
 			print_syntax_error(parser);

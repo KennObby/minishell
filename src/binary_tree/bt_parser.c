@@ -112,7 +112,11 @@ t_node	*parse_grouping(t_parser *parser)
 			return (subtree);
 		}
 		consume(parser);
-		parse_redirects(parser, subtree);
+		if (!parse_redirects(parser, subtree))
+		{
+			free_tree(subtree);
+			return (NULL);
+		}
 		return (subtree);
 	}
 	else

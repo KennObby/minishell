@@ -18,7 +18,9 @@ void	expand_node_args(t_node *node, t_env *env)
 	int		i;
 	char	*expanded;
 
-	if (!node || node->type != CMD)
+	if (!node)
+		return ;
+	if (node->type != CMD || !node->args)
 		return ;
 	i = 0;
 	while (node->args && node->args[i])
@@ -39,4 +41,6 @@ void	expand_node_args(t_node *node, t_env *env)
 		}
 		i++;
 	}
+	expand_node_args(node->reader, env);
+	expand_node_args(node->writer, env);
 }

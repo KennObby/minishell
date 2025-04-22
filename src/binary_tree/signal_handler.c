@@ -26,7 +26,7 @@ void	heredoc_sig_handler(int sig)
 {
 	(void)sig;
 	write(1, "\n", 1);
-	exit(130);
+	exit(1);
 }
 
 /* The Linux Programming Interface, Page 390

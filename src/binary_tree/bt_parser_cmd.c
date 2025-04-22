@@ -45,19 +45,7 @@ static char	**collect_args(t_parser *parser, int *arg_count)
 	}
 	return (args);
 }
-/*
-static int	check_empty_args(t_parser *parser, char **args, int arg_count)
-{
-	if (arg_count == 0 && !is_redirection(peek(parser)))
-	{
-		print_syntax_error(parser);
-		parser->pos = MAX_TOKENS;
-		free(args);
-		return (0);
-	}
-	return (1);
-}
-*/
+
 t_node	*parse_command(t_parser *parser)
 {
 	char	**args;

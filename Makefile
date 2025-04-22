@@ -5,6 +5,7 @@ SRCS =  src/binary_tree/bt_parser.c				\
 		src/binary_tree/bt_parser_cmd.c 		\
 		src/binary_tree/bt_parser_redirs.c 		\
 		src/binary_tree/bt_parser_utils.c 		\
+		src/binary_tree/bt_parser_args.c 		\
 		src/binary_tree/token.c 				\
 		src/binary_tree/token_utils.c			\
 		src/binary_tree/init_tree.c 			\

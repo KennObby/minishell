@@ -25,28 +25,14 @@ int	builtin_env(t_env *env)
 int	builtin_echo(t_node *cmd, t_env **env)
 {
 	int		i;
-	char	*output;
 
+	(void)env;
 	i = 1;
 	while (cmd->args[i])
 	{
-		output = NULL;
-		if (cmd->args[i][0] == '\'' && ft_strlen(cmd->args[i]) > 1
-				&& cmd->args[i][ft_strlen(cmd->args[i]) - 1]== '\'')
-			output = handle_single_quotes(cmd->args[i]);
-		else if (cmd->args[i][0] == '"' && ft_strlen(cmd->args[i]) > 1
-			&& cmd->args[i][ft_strlen(cmd->args[i]) - 1]== '"')
-			output = handle_double_quotes(cmd->args[i], env);
-		else if (ft_strcmp(cmd->args[i], "$?") == 0)
-			output = ft_itoa(g_status);
-		else if (ft_strchr(cmd->args[i], '$'))
-			output = expand_double_quoted(ft_strdup(cmd->args[i]), env);
-		else
-			output = ft_strdup(cmd->args[i]);
-		ft_printf("%s", output);
+		ft_printf("%s", cmd->args[i]);
 		if (cmd->args[i + 1])
 			ft_printf(" ");
-		free(output);
 		i++;
 	}
 	ft_printf("\n");

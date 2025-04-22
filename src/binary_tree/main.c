@@ -126,9 +126,12 @@ int	main(int ac, char **av, char **envp)
 		parser = (t_parser){tokens, 0};
 		root = parse(&parser);
 		//print_tree(root, 0);
-		prepare_heredocs(root);
 		if (root)
+		{
+			expand_node_args(root, env_list);
+			prepare_heredocs(root);
 			g_status = execute(root, &env_list);
+		}
 		free_tree(root);
 		free_tokens(tokens);
 	}

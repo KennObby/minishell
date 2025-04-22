@@ -6,7 +6,7 @@
 /*   By: oilyine- <oleg.ilyine@student42.luxembour  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/25 10:01:37 by oilyine-          #+#    #+#             */
-/*   Updated: 2025/03/25 10:04:49 by oilyine-         ###   ########.fr       */
+/*   Updated: 2025/04/22 11:31:08 by oilyine-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,6 +181,9 @@ int			parse_redirects(t_parser *parser, t_node *cmd_node);
 t_node		*parse_pipeline(t_parser *parser);
 t_node		*parse_command(t_parser *parser);
 t_node		*parse_grouping(t_parser *parser);
+
+//< --------------------------- bt_parser_args.c -------------- >
+void		expand_node_args(t_node *node, t_env *env);
 
 //< --------------------------- token.c ----------------------- >
 int			is_operator(char c);

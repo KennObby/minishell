@@ -106,7 +106,6 @@ char	*expand_double_quoted(const char *s, t_env **env)
 		}
 	}
 	ft_printf(">> expanding quotes: %s\n", s);
-	free((char *)s);
 	return (result);
 }
 

@@ -107,8 +107,6 @@ typedef struct s_token
 	t_type	type;
 	char	*value;
 	bool	has_no_space_after;
-	t_env	*env_list;
-	char	*input;
 }				t_token;
 
 /*
@@ -189,7 +187,7 @@ void		expand_node_args(t_node *node, t_env *env);
 int			is_operator(char c);
 t_token		create_token(t_type type, char *val);
 int			tokenize_word(char *input, t_token *tokens, int i, int *pos);
-t_token		*tokenize(char *input, t_env *env_list);
+t_token		*tokenize(char *input);
 int			tokenize_operators(char *input, t_token *tokens, int i, int *pos);
 
 //< --------------------------- token_utils.c ----------------- >

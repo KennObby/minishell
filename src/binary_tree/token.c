@@ -20,8 +20,6 @@ t_token	create_token(t_type type, char *val)
 	token.type = type;
 	token.value = val;
 	token.has_no_space_after = false;
-	token.env_list = NULL;
-	token.input = NULL;
 	return (token);
 }
 
@@ -43,7 +41,7 @@ int	tokenize_word(char *input, t_token *tokens, int i, int *pos)
  * Tokenizer based on struct t_type. 
  * 
  */
-t_token	*tokenize(char *input, t_env *env)
+t_token	*tokenize(char *input)
 {
 	t_token	*tokens;
 	int		i;
@@ -74,15 +72,8 @@ t_token	*tokenize(char *input, t_env *env)
 		else
 			i = tokenize_word(input, tokens, i, &pos);
 	}
-	tokens[i] = (t_token){END, NULL, false, env, input};
-	//tokens[i + 1] = (t_token){0};
-	for (int j = 0; tokens[i].type != END; j++)
-	{
-		tokens[j].env_list = env;
-		tokens[j].input = input;
-		ft_printf("Token[%d]: type=%d value='%s'\n",
-			j, tokens[j].type, tokens[j].value);
-	}
+	tokens[i] = (t_token){END, NULL, false};
+	tokens[i + 1] = (t_token){0};
 	return (tokens);
 }
 

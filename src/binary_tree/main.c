@@ -119,21 +119,23 @@ int	main(int ac, char **av, char **envp)
 		}
 		if (ft_strlen(input))
 			add_history(input);
-		tokens = tokenize(input, env_list);
+		tokens = tokenize(input);
 		free(input);
 		if (!tokens)
 			continue ;
 		parser = (t_parser){tokens, 0};
 		root = parse(&parser);
 		print_tree(root, 0);
-		if (root)
+		if (!root)
 		{
-			expand_node_args(root, env_list);
-			prepare_heredocs(root);
-			g_status = execute(root, &env_list);
+			free_tokens(tokens);
+			free_tree(root);
 		}
-		free_tree(root);
+		expand_node_args(root, env_list);
+		prepare_heredocs(root);
+		g_status = execute(root, &env_list);
 		free_tokens(tokens);
+		free_tree(root);
 	}
 	free_env_list(env_list);
 	rl_clear_history();

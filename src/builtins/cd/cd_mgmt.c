@@ -92,5 +92,6 @@ int	builtin_cd(t_node *cmd, t_env **env)
 	if (old_pwd)
 		update_or_add_env(env, "OLDPWD", old_pwd);
 	update_or_add_env(env, "PWD", cwd);
+	free(target);
 	return (0);
 }

@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
+#include <stdlib.h>
 /*
  * In C convention, '\'' represents a single quote (e.g: " ' ")
  * Like, every "valid escapes" character can be isloated this way.
@@ -93,8 +94,14 @@ char	*expand_double_quoted(const char *s, t_env **env)
 		{
 			i++;
 			name = extract_var_name(&s[i]);
-			if (!name || ft_strlen(name) == 0)
+			if (!name)
 			{
+				result = ft_strjoin_free(result, "$");
+				continue ;
+			}
+			if (ft_strlen(name) == 0)
+			{
+				free(name);
 				result = ft_strjoin_free(result, "$");
 				continue ;
 			}
@@ -115,6 +122,7 @@ char	*expand_double_quoted(const char *s, t_env **env)
 		}
 	}
 	ft_printf(">> expanding quotes: %s\n", s);
+	free((char *)s);
 	return (result);
 }
 

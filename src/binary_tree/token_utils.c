@@ -31,7 +31,7 @@ int	is_control_token(t_type type)
 {
 	return (type == LOGICAL_AND || type == LOGICAL_OR
 		|| type == PIPE || type == SEMICOLON
-		|| type == GROUPING_CLOSE || type == END);
+		|| type == GROUPING_OPEN || type == GROUPING_CLOSE || type == END);
 }
 
 /*

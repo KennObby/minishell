@@ -20,6 +20,8 @@ void	expand_node_args(t_node *node, t_env *env)
 
 	if (!node)
 		return ;
+	expand_node_args(node->reader, env);
+	expand_node_args(node->writer, env);
 	if (node->type != CMD || !node->args)
 		return ;
 	i = 0;
@@ -41,6 +43,4 @@ void	expand_node_args(t_node *node, t_env *env)
 		}
 		i++;
 	}
-	expand_node_args(node->reader, env);
-	expand_node_args(node->writer, env);
 }

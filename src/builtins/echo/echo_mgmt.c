@@ -44,6 +44,8 @@ char	*extract_var_name(const char *s)
 		return (NULL);
 	while (s[len] && (ft_isalnum(s[len]) || s[len] == '_'))
 		len++;
+	if (len == 0)
+		return (NULL);
 	return (ft_substr(s, 0, len));
 }
 /*
@@ -73,6 +75,7 @@ char	*expand_double_quoted(const char *s, t_env **env)
 	int		i;
 	char	*tmp;
 	char	*name;
+	char	*value;
 
 	result = ft_strdup("");
 	i = 0;
@@ -88,13 +91,19 @@ char	*expand_double_quoted(const char *s, t_env **env)
 		}
 		else if (s[i] == '$')
 		{
-			name = extract_var_name(&s[i + 1]);
-			tmp = get_env_value(*env, name);
-			if (tmp)
-				result = ft_strjoin_free(result, tmp);
+			i++;
+			name = extract_var_name(&s[i]);
+			if (!name || ft_strlen(name) == 0)
+			{
+				result = ft_strjoin_free(result, "$");
+				continue ;
+			}
+			value = get_env_value(*env, name);
+			if (value)
+				result = ft_strjoin_free(result, value);
 			else
 				result = ft_strjoin_free(result, "");
-			i += ft_strlen(name) + 1;
+			i += ft_strlen(name);
 			free(name);
 		}
 		else

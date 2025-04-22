@@ -59,19 +59,29 @@ t_token	*tokenize(char *input, t_env *env)
 			pos++;
 			continue ;
 		}
-		if (is_operator(input[pos]))
+		else if (input[pos] == '&' && input[pos + 1] == '&')
+		{
+			tokens[i++] = create_token(LOGICAL_AND, ft_strdup("&&"));
+			pos += 2;
+		}
+		else if (ft_strncmp(&input[pos], "||", 2) == 0)
+		{
+			tokens[i++] = create_token(LOGICAL_OR, ft_strdup("||"));
+			pos += 2;
+		}
+		else if (is_operator(input[pos]))
 			i = tokenize_operators(input, tokens, i, &pos);
 		else
 			i = tokenize_word(input, tokens, i, &pos);
 	}
 	tokens[i] = (t_token){END, NULL, false, env, input};
-	tokens[i + 1] = (t_token){0};
-	for (int j = 0; tokens[i].type != END; i++)
+	//tokens[i + 1] = (t_token){0};
+	for (int j = 0; tokens[i].type != END; j++)
 	{
 		tokens[j].env_list = env;
 		tokens[j].input = input;
 		ft_printf("Token[%d]: type=%d value='%s'\n",
-			i, tokens[i].type, tokens[i].value);
+			j, tokens[j].type, tokens[j].value);
 	}
 	return (tokens);
 }
@@ -88,7 +98,7 @@ int	tokenize_operators(char *input, t_token *tokens, int i, int *pos)
 		tokens[i++] = create_token(HEREDOC, ft_strdup("<<"));
 		*pos += 2;
 	}
-	else if (ft_strncmp(&input[*pos], "&&", 2) == 0)
+	else if (input[*pos] == '&' && input[*pos + 1] == '&')
 	{
 		tokens[i++] = create_token(LOGICAL_AND, ft_strdup("&&"));
 		*pos += 2;

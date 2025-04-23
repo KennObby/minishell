@@ -68,6 +68,10 @@ int	exec_builtin(t_node *cmd, t_env **env)
 		return (builtin_cd(cmd, env));
 	if (!ft_strcmp(cmd->args[0], "echo"))
 		return (builtin_echo(cmd, env));
+	if (!ft_strcmp(cmd->args[0], "export"))
+		return (builtin_export(cmd, env));
+	if (!ft_strcmp(cmd->args[0], "unset"))
+		return (builtin_unset(cmd, env));
 	ft_printf(">>> running builtin: %s\n", cmd->args[0]);
 	return (127);
 }

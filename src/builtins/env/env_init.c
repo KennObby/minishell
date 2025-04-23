@@ -51,3 +51,58 @@ char	**env_list_to_array(t_env *env)
 	arr[i] = NULL;
 	return (arr);
 }
+
+t_env	*copy_env(t_env *env)
+{
+	t_env	*copy;
+	t_env	*tail;
+	t_env	*new;
+
+	copy = NULL;
+	tail = NULL;
+	while (env)
+	{
+		new = malloc(sizeof(t_env));
+		new->key = ft_strdup(env->key);
+		if (env->value)
+			new->value = ft_strdup(env->value);
+		else
+			new->value = NULL;
+		new->next = NULL;
+		if (!copy)
+			copy = new;
+		else
+			tail->next = new;
+		tail = new;
+		env = env->next;
+	}
+	return (copy);
+}
+
+void	sort_env(t_env *env)
+{
+	t_env	*i;
+	t_env	*j;
+	char	*tmp_key;
+	char	*tmp_val;
+
+	i = env;
+	while (i)
+	{
+		j = i->next;
+		while (j)
+		{
+			if (ft_strcmp(i->key, j->key) > 0)
+			{
+				tmp_key = i->key;
+				i->key = j->key;
+				j->key = tmp_key;
+				tmp_val = i->value;
+				i->value = j->value;
+				j->value = tmp_val;
+			}
+			j = j->next;
+		}
+		i = i->next;
+	}
+}

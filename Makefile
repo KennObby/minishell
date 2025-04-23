@@ -21,6 +21,8 @@ SRCS =  src/binary_tree/bt_parser.c				\
 		src/builtins/pwd/pwd_mgmt.c 			\
 		src/builtins/echo/echo_mgmt.c			\
 		src/builtins/cd/cd_mgmt.c 				\
+		src/builtins/export/export_mgmt.c 		\
+		src/builtins/unset/unset_mgmt.c 		\
 		src/binary_tree/main.c
 
 OBJS = $(SRCS:.c=.o)

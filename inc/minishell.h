@@ -71,7 +71,6 @@ typedef enum e_type
 	NB_TYPES,
 }				t_type;
 
-
 /*
  * filename = stores regular redirs
  * fd = for HEREDOC (read-end of pipe)
@@ -184,7 +183,6 @@ t_node		*parse_grouping(t_parser *parser);
 void		expand_node_args(t_node *node, t_env *env);
 
 //< --------------------------- token.c ----------------------- >
-int			is_operator(char c);
 t_token		create_token(t_type type, char *val);
 int			tokenize_word(char *input, t_token *tokens, int i, int *pos);
 t_token		*tokenize(char *input);
@@ -243,6 +241,8 @@ void		bump_shlvl(t_env *env);
 //< --------------------------- env_init.c -------------------- >
 t_env		*init_env_list(char **envp);
 char		**env_list_to_array(t_env *env);
+t_env		*copy_env(t_env *env);
+void		sort_env(t_env *env);
 
 //< --------------------------- free_env.c -------------------- >
 void		free_env_list(t_env *env);
@@ -261,6 +261,13 @@ char		*extract_var_name(const char *s);
 char		*ft_strjoin_free(char *s1, const char *s2);
 char		*expand_double_quoted(const char *s, t_env **env);
 char		*handle_double_quotes(char *arg, t_env **env);
+
+//< --------------------------- export_mgmt.c ----------------- >
+int			print_export(t_env *env);
+int			builtin_export(t_node *cmd, t_env **env);
+
+//< --------------------------- unset_mgmt.c ------------------ >
+int			builtin_unset(t_node *cmd, t_env **env);
 
 //< --------------------------- builtin_utils.c --------------- >
 int			is_builtin(char *cmd);

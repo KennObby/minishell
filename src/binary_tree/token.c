@@ -27,11 +27,36 @@ int	tokenize_word(char *input, t_token *tokens, int i, int *pos)
 {
 	int		start;
 	char	*value;
+	char	quote;
 
 	start = *pos;
-	while (input[*pos] && !ft_isspace(input[*pos])
-		&& !is_operator(input[*pos]))
-		(*pos)++;
+	if (input[*pos] == '\'' || input[*pos] == '"')
+	{
+		quote = input[(*pos)++];
+		while (input[*pos] && input[*pos] != quote)
+			(*pos)++;
+		if (input[*pos] == quote)
+			(*pos)++;
+	}
+	else
+	{
+		while (input[*pos] && !ft_isspace(input[*pos])
+			&& !is_operator(input[*pos]))
+		{
+			if (input[*pos] == '=' && (input[*pos + 1] == '"'
+					|| input[*pos + 1] == '\''))
+			{
+				(*pos)++;
+				quote = input[(*pos)++];
+				while (input[*pos] && input[*pos] != quote)
+					(*pos)++;
+				if (input[*pos] == quote)
+					(*pos)++;
+				break ;
+			}
+			(*pos)++;
+		}
+	}
 	value = ft_substr(input, start, *pos - start);
 	tokens[i] = create_token(WORD, value);
 	tokens[i].has_no_space_after = has_no_space_after(input, *pos);

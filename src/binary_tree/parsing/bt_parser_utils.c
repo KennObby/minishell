@@ -10,7 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../inc/minishell.h"
+#include "../../../inc/minishell.h"
+#include <stdbool.h>
 
 t_type	peek(t_parser *parser)
 {
@@ -32,28 +33,21 @@ int	is_redirection(t_type type)
 
 void	print_syntax_error(t_parser *parser)
 {
-	const char	*token_val;
+	char	*token_val;
 
 	if (peek(parser) == END || !parser->tokens[parser->pos].value)
 		token_val = "newline";
 	else
 		token_val = parser->tokens[parser->pos].value;
-	ft_printf("bash: syntax error near unexpected token `%s'\n", token_val);
+	ft_putstr_fd("bash: syntax error near unexpected token `", STDERR_FILENO);
+	ft_putstr_fd(token_val, STDERR_FILENO);
+	ft_putendl_fd("'", STDERR_FILENO);
 }
 
-bool	expect_valid_token(t_parser *parser, t_type *expected, int count)
+bool	expect_valid_token(t_parser *parser)
 {
-	t_type	current;
-	int		i;
-
-	current = peek(parser);
-	i = 0;
-	while (i < count)
-	{
-		if (current == expected[i])
-			return (true);
-		i++;
-	}
+	if (peek(parser) == WORD || peek(parser) == GROUPING_OPEN)
+		return (true);
 	print_syntax_error(parser);
 	parser->pos = MAX_TOKENS;
 	return (false);

@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   binary_tree.c                                      :+:      :+:    :+:   */
+/*   init_tree.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: oilyine- <oleg.ilyine@student42.luxembour  +#+  +:+       +#+        */
+/*   By: oilyine- <oleg.ilyine@student42.luxembo    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/30 11:40:00 by oilyine-          #+#    #+#             */
-/*   Updated: 2025/03/30 11:55:26 by oilyine-         ###   ########.fr       */
+/*   Updated: 2025/04/26 17:38:29 by oilyine-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../inc/minishell.h"
+#include "../../../inc/minishell.h"
 
 t_node	*create_leaf(char **args)
 {
@@ -47,6 +47,6 @@ t_node	*create_node(t_type type, t_node *left, t_node *right)
 	node->reader = right;
 	node->redirs = NULL;
 	node->redir_count = 0;
-	ft_printf("[NODE] Created node of type: %d\n", type);
+	//ft_printf("[NODE] Created node of type: %d\n", type);
 	return (node);
 }

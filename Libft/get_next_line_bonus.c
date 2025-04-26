@@ -11,32 +11,7 @@
 /* ************************************************************************** */
 
 #include "get_next_line_bonus.h"
-
-char	*ft_substr(const char *s, unsigned int start, size_t len)
-{
-	char	*substr;
-	size_t	s_len;
-	size_t	i;
-
-	i = 0;
-	if (!s)
-		return (NULL);
-	s_len = ft_strlen(s);
-	if (start >= s_len)
-		return (ft_strdup(""));
-	if (start + len > s_len)
-		len = s_len - start;
-	substr = malloc(sizeof(char) * (len + 1));
-	if (!substr)
-		return (NULL);
-	while (i < len && s[start + i])
-	{
-		substr[i] = s[start + i];
-		i++;
-	}
-	substr[len] = '\0';
-	return (substr);
-}
+#include "libft.h"
 
 char	*fill_line_buffer(int fd, char **left_c, char *buffer)
 {

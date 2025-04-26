@@ -1,19 +1,20 @@
 LIBFT_DIR = Libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
-SRCS =  src/binary_tree/bt_parser.c				\
-		src/binary_tree/bt_parser_cmd.c 		\
-		src/binary_tree/bt_parser_redirs.c 		\
-		src/binary_tree/bt_parser_utils.c 		\
-		src/binary_tree/bt_parser_args.c 		\
-		src/binary_tree/token.c 				\
-		src/binary_tree/token_utils.c			\
-		src/binary_tree/init_tree.c 			\
-		src/binary_tree/free_tree.c 			\
-		src/binary_tree/to_str_helper.c 		\
-		src/binary_tree/exec_ops.c 				\
-		src/binary_tree/exec_mgmt.c 			\
-		src/binary_tree/signal_handler.c 		\
+SRCS =  src/binary_tree/parsing/bt_parser.c				\
+		src/binary_tree/parsing/bt_parser_cmd.c 		\
+		src/binary_tree/parsing/bt_parser_redirs.c 		\
+		src/binary_tree/parsing/bt_parser_utils.c 		\
+		src/binary_tree/parsing/bt_parser_args.c 		\
+		src/binary_tree/parsing/bt_parser_helpers.c		\
+		src/binary_tree/tokens/token.c 				\
+		src/binary_tree/tokens/token_utils.c			\
+		src/binary_tree/init/init_tree.c 			\
+		src/binary_tree/utils/free_tree.c 			\
+		src/binary_tree/utils/to_str_helper.c 		\
+		src/binary_tree/utils/signal_handler.c 		\
+		src/binary_tree/exec/exec_ops.c 				\
+		src/binary_tree/exec/exec_mgmt.c 			\
 		src/builtins/builtin_mgmt.c 			\
 		src/builtins/env/env_mgmt.c 			\
 		src/builtins/env/env_init.c 			\

@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../inc/minishell.h"
+#include "../../../inc/minishell.h"
 
 const char	*redir_type_str(t_type type)
 {
@@ -44,4 +44,50 @@ const char	*type_to_str(t_type type)
 	if (type >= CMD && type <= HEREDOC && type_str[type])
 		return (type_str[type]);
 	return ("UNKNOWN TYPE");
+}
+
+void	print_tree(t_node *node, int depth)
+{
+	int	i;
+
+	if (!node)
+		return ;
+	ft_printf("\n");
+	//print_tree(node->reader, depth + 4);
+	i = 0;
+	while (i < depth)
+	{
+		ft_printf(" ");
+		i++;
+	}
+	if (node->type == SEMICOLON)
+	{
+		print_tree(node->writer, depth + 4);
+		print_tree(node->reader, depth + 4);
+	}
+	if (node->type == CMD)
+	{
+		ft_printf("CMD: ");
+		i = 0;
+		while (node->args[i])
+		{
+			ft_printf("%s ", node->args[i]);
+			i++;
+		}
+		i = 0;
+		while (i < node->redir_count)
+		{
+			ft_printf("[%s %s]", redir_type_str(node->redirs[i].type),
+				node->redirs[i].filename);
+			i++;
+		}
+		ft_printf("\n");
+	}
+	else
+	{
+		ft_printf("OP: %s\n", type_to_str(node->type));
+		print_tree(node->writer, depth + 1);
+		print_tree(node->reader, depth + 1);
+	}
+	//print_tree(node->writer, depth + 4);
 }

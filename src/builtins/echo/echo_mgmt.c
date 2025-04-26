@@ -77,6 +77,7 @@ char	*expand_double_quoted(const char *s, t_env **env)
 	char	*tmp;
 	char	*name;
 	char	*value;
+	char	*exit_status;
 
 	result = ft_strdup("");
 	i = 0;
@@ -88,6 +89,14 @@ char	*expand_double_quoted(const char *s, t_env **env)
 			tmp = ft_substr(s, i + 1, 1);
 			result = ft_strjoin_free(result, tmp);
 			free(tmp);
+			i += 2;
+		}
+		else if (s[i] == '$' && s[i + 1] == '?'
+			&& (i == 0 || s[i - 1] != '$'))
+		{
+			exit_status = ft_itoa(g_status);
+			result = ft_strjoin_free(result, exit_status);
+			free(exit_status);
 			i += 2;
 		}
 		else if (s[i] == '$')
@@ -121,7 +130,7 @@ char	*expand_double_quoted(const char *s, t_env **env)
 			i++;
 		}
 	}
-	ft_printf(">> expanding quotes: %s\n", s);
+	//ft_printf(">> expanding quotes: %s\n", s);
 	free((char *)s);
 	return (result);
 }
@@ -138,6 +147,6 @@ char	*handle_double_quotes(char *arg, t_env **env)
 		return (ft_strdup(arg));
 	if (!stripped)
 		return (NULL);
-	ft_printf(">> stripped: = %s\n", stripped);
+	//ft_printf(">> stripped: = %s\n", stripped);
 	return (expand_double_quoted(stripped, env));
 }

@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../inc/minishell.h"
+#include "../../../inc/minishell.h"
 #include <stdlib.h>
 
 void	expand_node_args(t_node *node, t_env *env)
@@ -18,17 +18,14 @@ void	expand_node_args(t_node *node, t_env *env)
 	int		i;
 	char	*expanded;
 
-	if (!node)
+	if (!node || node->type != CMD || !node->args)
 		return ;
 	expand_node_args(node->reader, env);
 	expand_node_args(node->writer, env);
-	if (node->type != CMD || !node->args)
-		return ;
 	i = 0;
 	while (node->args && node->args[i])
 	{
 		expanded = NULL;
-		ft_printf(">> expanding arg[%d]: %s\n", i, node->args[i]);
 		if (node->args[i][0] == '\'' && ft_strlen(node->args[i]) >= 2)
 			expanded = handle_single_quotes(node->args[i]);
 		else if (node->args[i][0] == '"' && ft_strlen(node->args[i]) >= 2)
@@ -37,7 +34,6 @@ void	expand_node_args(t_node *node, t_env *env)
 			expanded = expand_double_quoted(ft_strdup(node->args[i]), &env);
 		if (expanded)
 		{
-			ft_printf(">> replaced with %s\n", expanded);
 			free(node->args[i]);
 			node->args[i] = expanded;
 		}

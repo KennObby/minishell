@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../inc/minishell.h"
+#include "../../../inc/minishell.h"
 #include <string.h>
 
 void	free_tree(t_node *node)
@@ -26,25 +26,20 @@ void	free_tree(t_node *node)
 	{
 		i = 0;
 		while (node->args[i])
-		{
-			free(node->args[i]);
-			i++;
-		}
+			free(node->args[i++]);
 		free(node->args);
-		node->args = NULL;
 	}
 	if (node->redirs)
 	{
 		i = 0;
 		while (i < node->redir_count)
-		{
-			free(node->redirs[i].filename);
-			node->redirs[i].filename = NULL;
-			i++;
-		}
+			free(node->redirs[i++].filename);
 		free(node->redirs);
-		node->redirs = NULL;
 	}
+	node->args = NULL;
+	node->redirs = NULL;
+	node->writer = NULL;
+	node->reader = NULL;
 	free(node);
 }
 

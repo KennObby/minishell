@@ -10,9 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../inc/minishell.h"
+#include "../../../inc/minishell.h"
 
-static int	add_redirect(t_parser *parser, t_node *cmd_node, t_redir redir)
+int	add_redirect(t_parser *parser, t_node *cmd_node, t_redir redir)
 {
 	t_redir	*new_redirs;
 
@@ -38,18 +38,14 @@ int	parse_redirects(t_parser *parser, t_node *cmd_node)
 	{
 		redir.type = parser->tokens[parser->pos].type;
 		parser->pos++;
-		if (parser->pos >= MAX_TOKENS)
-		{
-			print_syntax_error(parser);
-			return (0);
-		}
-		if (peek(parser) != WORD)
+		if (parser->pos >= MAX_TOKENS || peek(parser) != WORD)
 		{
 			print_syntax_error(parser);
 			parser->pos = MAX_TOKENS;
 			return (0);
 		}
 		redir.filename = ft_strdup(parser->tokens[parser->pos].value);
+		redir.fd = -1;
 		parser->pos++;
 		if (!add_redirect(parser, cmd_node, redir))
 			return (0);

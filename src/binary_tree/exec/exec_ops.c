@@ -10,8 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../inc/minishell.h"
+#include "../../../inc/minishell.h"
 #include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 /* DOCS : https://sites.uclouvain.be/SystInfo/usr/include/bits/waitstatus.h.html
@@ -22,6 +23,7 @@ int	execute_cmd(t_node *cmd, t_env *env_list)
 	char	**envp;
 	int		status;
 	int		sig;
+	int		redir_status;
 	pid_t	pid;
 
 	pid = fork();
@@ -32,12 +34,13 @@ int	execute_cmd(t_node *cmd, t_env *env_list)
 	}
 	if (pid == 0)
 	{
-		if (handle_redirections(cmd) != 0)
-			exit(1);
+		redir_status = handle_redirections(cmd);
+		if (redir_status != 0)
+			exit(redir_status);
 		envp = env_list_to_array(env_list);
 		if (!cmd || !cmd->args || !cmd->args[0])
 		{
-			ft_printf("minishell: invalid command");
+			ft_putstr_fd("minishell: invalid command\n", 2);
 			exit(127);
 		}
 		if (ft_strchr(cmd->args[0], '/'))
@@ -47,21 +50,19 @@ int	execute_cmd(t_node *cmd, t_env *env_list)
 				reset_signals();
 				execve(cmd->args[0], cmd->args, envp);
 			}
-			ft_printf("bash: %s: command not found\n", cmd->args[0]);
-			exit(127);
+			perror(cmd->args[0]);
+			exit(126);
 		}
 		cmd_path = resolve_path(cmd->args[0], env_list);
 		if (!cmd_path)
 		{
-			ft_printf("bash: %s: command not found\n", cmd->args[0]);
+			ft_putstr_fd("minishell: command not found", 2);
 			exit(127);
 		}
 		reset_signals();
 		execve(cmd_path, cmd->args, envp);
-		ft_printf("bash: command not found: %s\n", cmd_path);
-		free(cmd_path);
-		free_str_array(envp);
-		exit(1);
+		perror(cmd_path);
+		exit(126);
 	}
 	waitpid(pid, &status, 0);
 	if (WIFEXITED(status))
@@ -161,8 +162,8 @@ int	handle_redirections(t_node *cmd)
 			fd = cmd->redirs[i].fd;
 		if (fd == -1)
 		{
-			ft_printf("bash: %s: No such file or directory", cmd->args[0]);
-			exit (126);
+			perror(cmd->redirs[i].filename);
+			return (1);
 		}
 		if (cmd->redirs[i].type == REDIRECT_IN
 			|| cmd->redirs[i].type == HEREDOC)

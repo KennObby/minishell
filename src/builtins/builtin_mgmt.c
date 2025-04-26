@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
+#include <stdlib.h>
 
 int	builtin_env(t_env *env)
 {
@@ -25,12 +26,15 @@ int	builtin_env(t_env *env)
 int	builtin_echo(t_node *cmd, t_env **env)
 {
 	int		i;
+	char	*expanded_arg;
 
 	(void)env;
 	i = 1;
 	while (cmd->args[i])
 	{
-		ft_printf("%s", cmd->args[i]);
+		expanded_arg = handle_double_quotes(cmd->args[i], env);
+		ft_printf("%s", expanded_arg);
+		free(expanded_arg);
 		if (cmd->args[i + 1])
 			ft_printf(" ");
 		i++;

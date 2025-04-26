@@ -11,57 +11,14 @@
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
+#include <readline/history.h>
 #include <readline/readline.h>
+#include <signal.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <unistd.h>
 
 int	g_status = 0;
-
-void	print_tree(t_node *node, int depth)
-{
-	int	i;
-
-	if (!node)
-		return ;
-	ft_printf("\n");
-	//print_tree(node->reader, depth + 4);
-	i = 0;
-	while (i < depth)
-	{
-		ft_printf(" ");
-		i++;
-	}
-	if (node->type == SEMICOLON)
-	{
-		print_tree(node->writer, depth + 4);
-		print_tree(node->reader, depth + 4);
-	}
-	if (node->type == CMD)
-	{
-		ft_printf("CMD: ");
-		i = 0;
-		while (node->args[i])
-		{
-			ft_printf("%s ", node->args[i]);
-			i++;
-		}
-		i = 0;
-		while (i < node->redir_count)
-		{
-			ft_printf("[%s %s]", redir_type_str(node->redirs[i].type),
-				node->redirs[i].filename);
-			i++;
-		}
-		ft_printf("\n");
-	}
-	else
-	{
-		ft_printf("OP: %s\n", type_to_str(node->type));
-		print_tree(node->writer, depth + 1);
-		print_tree(node->reader, depth + 1);
-	}
-	//print_tree(node->writer, depth + 4);
-}
 
 char	*built_prompt(t_env *env)
 {
@@ -86,25 +43,33 @@ char	*built_prompt(t_env *env)
 	}
 	return (ft_strjoin(cwd, " > "));
 }
+
+void	remove_newline(char *str)
+{
+	size_t	len;
+
+	len = ft_strlen(str);
+	if (len > 0 && str[len - 1] == '\n')
+		str[len - 1] = '\0';
+}
 /*
- * ast = https://deepsource.com/glossary/ast 
+ * ast (root variable) = https://deepsource.com/glossary/ast
+ *
+ * non_interactive and interactive_mode => see isatty() func
+ * https://medium.com/@santiagobedoa/coding-a-shell-using-c-1ea939f10e7e
+ *
  * environment variables tried to be managed (char **envp)
  * !! -> Maybe considering to add env_list in s_env struct
  *
  */
-int	main(int ac, char **av, char **envp)
+void	inter_mode(t_env *env_list)
 {
 	char		*input;
 	char		*prompt;
 	t_token		*tokens;
-	t_env		*env_list;
 	t_node		*root;
 	t_parser	parser;
 
-	(void)ac;
-	(void)av;
-	env_list = init_env_list(envp);
-	bump_shlvl(env_list);
 	while (1)
 	{
 		prompt = built_prompt(env_list);
@@ -125,11 +90,10 @@ int	main(int ac, char **av, char **envp)
 			continue ;
 		parser = (t_parser){tokens, 0};
 		root = parse(&parser);
-		print_tree(root, 0);
 		if (!root)
 		{
 			free_tokens(tokens);
-			free_tree(root);
+			continue ;
 		}
 		expand_node_args(root, env_list);
 		prepare_heredocs(root);
@@ -137,6 +101,62 @@ int	main(int ac, char **av, char **envp)
 		free_tokens(tokens);
 		free_tree(root);
 	}
+}
+
+void	non_inter_mode(t_env *env_list)
+{
+	char		*input;
+	t_token		*tokens;
+	t_node		*root;
+	t_parser	parser;
+
+	setup_signals();
+	input = get_next_line(0);
+	while (input != NULL)
+	{
+		if (input[0] == '\0' || input[0] == '\n')
+		{
+			free(input);
+			input = get_next_line(0);
+			continue ;
+		}
+		remove_newline(input);
+		tokens = tokenize(input);
+		free(input);
+		if (!tokens)
+		{
+			input = get_next_line(0);
+			continue ;
+		}
+		parser = (t_parser){tokens, 0};
+		root = parse(&parser);
+		if (!root)
+		{
+			free_tokens(tokens);
+			input = get_next_line(0);
+			continue ;
+		}
+		expand_node_args(root, env_list);
+		prepare_heredocs(root);
+		g_status = execute(root, &env_list);
+		free_tokens(tokens);
+		free_tree(root);
+		input = get_next_line(0);
+	}
+}
+
+int	main(int ac, char **av, char **envp)
+{
+	t_env		*env_list;
+
+	(void)ac;
+	(void)av;
+	env_list = init_env_list(envp);
+	bump_shlvl(env_list);
+	if (!isatty(0))
+		non_inter_mode(env_list);
+	else
+		inter_mode(env_list);
 	free_env_list(env_list);
 	rl_clear_history();
 	return (g_status);

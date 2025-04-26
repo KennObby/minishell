@@ -28,6 +28,7 @@
 # include <sys/ioctl.h>
 # include <dirent.h>
 # include <termios.h>
+# include <errno.h>
 # include "../Libft/libft.h"
 # include "../Libft/ft_printf.h"
 # include "../Libft/get_next_line_bonus.h"
@@ -168,16 +169,29 @@ void		consume(t_parser *parser);
 int			is_redirection(t_type type);
 void		print_syntax_error(t_parser *parser);
 t_node		*parse(t_parser *parser);
-bool		expect_valid_token(t_parser *parser, t_type *expected, int count);
+bool		expect_valid_token(t_parser *parser);
 bool		expect_token_and_consume(t_parser *parser, t_type expected);
+
+//< -------------------------- bt_parser_helpers.c ------------ >
+void		*handle_syntax_error(t_parser *parser);
+
+//< --------------------------- bt_parser_redirs.c ------------ >
+int			add_redirect(t_parser *parser, t_node *cmd_node, t_redir redir);
+int			parse_redirects(t_parser *parser, t_node *cmd_node);
+
+//< -------------------------- bt_parser_cmd.c ---------------- >
+int			parse_single_redirect(t_parser *parser, t_node *cmd_node);
+char		*merge_tokens(t_parser *parser);
+char		**collect_args(t_parser *parser, t_node *cmd_node, int *arg_count);
+int			finalize_args(t_node *cmd, char **args, int arg);
+t_node		*parse_command(t_parser *parser);
 
 //< --------------------------- bt_parser.c ------------------- >
 t_node		*parse_semicolon(t_parser *parser);
 t_node		*parse_logical(t_parser *parser);
-int			parse_redirects(t_parser *parser, t_node *cmd_node);
 t_node		*parse_pipeline(t_parser *parser);
-t_node		*parse_command(t_parser *parser);
 t_node		*parse_grouping(t_parser *parser);
+t_node		*parse(t_parser *parser);
 
 //< --------------------------- bt_parser_args.c -------------- >
 void		expand_node_args(t_node *node, t_env *env);
@@ -201,11 +215,14 @@ void		free_args(char **args, int count);
 
 //< --------------------------- main.c ------------------------ >
 char		*build_prompt(t_env *env);
-void		print_tree(t_node *node, int depth);
+void		remove_newline(char	*str);
+void		inter_mode(t_env *env_list);
+void		non_inter_mode(t_env *env_list);
 
 //< --------------------------- to_str_helper.c --------------- >
 const char	*redir_type_str(t_type type);
 const char	*type_to_str(t_type type);
+void		print_tree(t_node *node, int depth);
 
 //< --------------------------- exec_utils.c ------------------ >
 void		heredoc_sig_handler(int sig);

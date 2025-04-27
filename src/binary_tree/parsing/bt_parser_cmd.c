@@ -71,6 +71,7 @@ char	**collect_args(t_parser *parser, t_node *cmd_node, int *arg_count)
 
 	args = NULL;
 	*arg_count = 0;
+	n = 0;
 	while (parser->pos < MAX_TOKENS && peek(parser) != END)
 	{
 		if (is_control_token(peek(parser)))
@@ -84,10 +85,10 @@ char	**collect_args(t_parser *parser, t_node *cmd_node, int *arg_count)
 		arg = merge_tokens(parser);
 		if (!arg)
 			return (free_args(args, n), NULL);
-		new_args = ft_realloc(args, n * sizeof(*args),
-				(n + 1) * sizeof(*args));
+		new_args = ft_realloc(args, n * sizeof * args,
+				(n + 1) * sizeof * args);
 		if (!new_args)
-			return (free(arg), free_args(args, *arg_count), NULL);
+			return (free(arg), free_args(args, n), NULL);
 		args = new_args;
 		args[n++] = arg;
 	}

@@ -93,6 +93,7 @@ void	inter_mode(t_env *env_list)
 		if (!root)
 		{
 			free_tokens(tokens);
+			g_status = 2;
 			continue ;
 		}
 		expand_node_args(root, env_list);
@@ -134,6 +135,7 @@ void	non_inter_mode(t_env *env_list)
 		{
 			free_tokens(tokens);
 			input = get_next_line(0);
+			g_status = 2;
 			continue ;
 		}
 		expand_node_args(root, env_list);

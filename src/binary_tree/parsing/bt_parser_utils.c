@@ -39,9 +39,9 @@ void	print_syntax_error(t_parser *parser)
 		token_val = "newline";
 	else
 		token_val = parser->tokens[parser->pos].value;
-	ft_putstr_fd("bash: syntax error near unexpected token `", STDERR_FILENO);
-	ft_putstr_fd(token_val, STDERR_FILENO);
-	ft_putendl_fd("'", STDERR_FILENO);
+	ft_putstr_fd("bash: syntax error near unexpected token `", 2);
+	ft_putstr_fd(token_val, 2);
+	ft_putendl_fd("'", 2);
 }
 
 bool	expect_valid_token(t_parser *parser)

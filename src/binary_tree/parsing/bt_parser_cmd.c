@@ -79,16 +79,16 @@ char	**collect_args(t_parser *parser, t_node *cmd_node, int *arg_count)
 		if (is_redirection(peek(parser)))
 		{
 			if (!parse_single_redirect(parser, cmd_node))
-				return ((free_args(args, n)), NULL);
+				return (free_args(args), NULL);
 			continue ;
 		}
 		arg = merge_tokens(parser);
 		if (!arg)
-			return (free_args(args, n), NULL);
+			return (free_args(args), NULL);
 		new_args = ft_realloc(args, n * sizeof * args,
 				(n + 1) * sizeof * args);
 		if (!new_args)
-			return (free(arg), free_args(args, n), NULL);
+			return (free(arg), free_args(args), NULL);
 		args = new_args;
 		args[n++] = arg;
 	}

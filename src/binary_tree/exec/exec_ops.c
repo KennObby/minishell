@@ -14,79 +14,84 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include <unistd.h>
 /* DOCS : https://sites.uclouvain.be/SystInfo/usr/include/bits/waitstatus.h.html
  */
-int	execute_cmd(t_node *cmd, t_env *env_list)
+int	execute_cmd(t_data *d)
 {
-	char	*cmd_path;
+	pid_t	pid;
 	char	**envp;
+	char	*path;
+	int		redir_status;
 	int		status;
 	int		sig;
-	int		redir_status;
-	pid_t	pid;
 
 	pid = fork();
 	if (pid < 0)
 	{
 		perror("minishell");
-		return (1);
+		return (d->exit_status = 1);
 	}
 	if (pid == 0)
 	{
-		redir_status = handle_redirections(cmd);
+		redir_status = handle_redirections(d->root);
 		if (redir_status != 0)
+		{
+			dup2(d->stdin_backup, STDIN_FILENO);
+			dup2(d->stdout_backup, STDOUT_FILENO);
+			d->exit_status = redir_status;
 			exit(redir_status);
-		envp = env_list_to_array(env_list);
-		if (!cmd || !cmd->args || !cmd->args[0])
+		}
+		envp = env_list_to_array(d->env_list);
+		if (!d->root->args || !d->root->args[0])
 		{
 			ft_putstr_fd("minishell: invalid command\n", 2);
 			exit(127);
 		}
-		if (ft_strchr(cmd->args[0], '/'))
+		if (ft_strchr(d->root->args[0], '/'))
 		{
-			if (access(cmd->args[0], X_OK) == 0)
+			if (access(d->root->args[0], X_OK) == 0)
 			{
 				reset_signals();
-				execve(cmd->args[0], cmd->args, envp);
+				execve(d->root->args[0], d->root->args, envp);
 			}
-			perror(cmd->args[0]);
+			perror(d->root->args[0]);
 			exit(126);
 		}
-		cmd_path = resolve_path(cmd->args[0], env_list);
-		if (!cmd_path)
+		path = resolve_path(d->root->args[0], d->env_list);
+		if (!path)
 		{
-			ft_putstr_fd("minishell: command not found", 2);
+			ft_putstr_fd("minishell: command not found\n", 2);
 			exit(127);
 		}
 		reset_signals();
-		execve(cmd_path, cmd->args, envp);
-		perror(cmd_path);
+		execve(path, d->root->args, envp);
 		exit(126);
 	}
 	waitpid(pid, &status, 0);
 	if (WIFEXITED(status))
-		return (WEXITSTATUS(status));
+		d->exit_status = WEXITSTATUS(status);
 	else if (WIFSIGNALED(status))
 	{
 		sig = WTERMSIG(status);
 		if (sig == SIGQUIT)
-			ft_putstr_fd("Quit: 3\n", 2);
+			ft_putstr_fd("Quit:3\n", 2);
 		else if (sig == SIGINT)
 			ft_putchar_fd('\n', 2);
-		return (128 + sig);
+		return (d->exit_status = 128 + sig);
 	}
-	return (1);
+	return (d->exit_status);
 }
 
-int	execute_pipe(t_node *pipe_node, t_env *env)
+int	execute_pipe(t_data *d)
 {
 	int		fd[2];
-	int		status;
 	pid_t	pid_left;
 	pid_t	pid_right;
+	int		status_left;
+	int		status_right;
 
-	status = 0;
 	if (pipe(fd) == -1)
 	{
 		perror("minishell");
@@ -98,7 +103,8 @@ int	execute_pipe(t_node *pipe_node, t_env *env)
 		close(fd[0]);
 		dup2(fd[1], STDOUT_FILENO);
 		close(fd[1]);
-		exit(execute(pipe_node->writer, &env));
+		d->root = d->root->writer;
+		exit(execute(d));
 	}
 	pid_right = fork();
 	if (pid_right == 0)
@@ -106,34 +112,62 @@ int	execute_pipe(t_node *pipe_node, t_env *env)
 		close(fd[1]);
 		dup2(fd[0], STDIN_FILENO);
 		close(fd[0]);
-		exit(execute(pipe_node->reader, &env));
+		d->root = d->root->reader;
+		exit(execute(d));
 	}
 	close(fd[0]);
 	close(fd[1]);
-	waitpid(pid_left, NULL, 0);
-	waitpid(pid_right, &status, 0);
-	return (WEXITSTATUS(status));
+	waitpid(pid_left, &status_left, 0);
+	waitpid(pid_right, &status_right, 0);
+	if (WIFEXITED(status_right))
+		d->exit_status = WEXITSTATUS(status_right);
+	else if (WIFSIGNALED(status_right))
+		d->exit_status = 128 + WTERMSIG(status_right);
+	else
+		d->exit_status = 1;
+	return (d->exit_status);
 }
 
-int	execute_logical(t_node *logical_node, t_env *env)
+int	execute_logical(t_data *d)
 {
+	t_node	*saved;
 	int		status;
 
-	status = execute(logical_node->writer, &env);
-	if (logical_node->type == LOGICAL_AND && status == 0)
-		return (execute(logical_node->reader, &env));
-	else if (logical_node->type == LOGICAL_OR && status != 0)
-		return (execute(logical_node->reader, &env));
-	return (status);
+	saved = d->root;
+	d->root = saved->writer;
+	status = execute(d);
+	if (saved->type == LOGICAL_AND)
+	{
+		if (status == 0)
+		{
+			d->root = saved->reader;
+			status = execute(d);
+		}
+	}
+	else if (saved->type == LOGICAL_OR)
+	{
+		if (status != 0)
+		{
+			d->root = saved->reader;
+			status = execute(d);
+		}
+	}
+	d->root = saved;
+	return (d->exit_status = status);
 }
 
-int	execute_semicolon(t_node *semi_node, t_env *env)
+int	execute_semicolon(t_data *d)
 {
-	int	left_status;
+	t_node	*saved;
+	int		status;
 
-	left_status = execute(semi_node->writer, &env);
-	(void)left_status;
-	return (execute(semi_node->reader, &env));
+	saved = d->root;
+	d->root = saved->writer;
+	(void)execute(d);
+	d->root = saved->reader;
+	status = execute(d);
+	d->root = saved;
+	return (d->exit_status = status);
 }
 
 int	handle_redirections(t_node *cmd)
@@ -160,10 +194,14 @@ int	handle_redirections(t_node *cmd)
 			fd = open(cmd->redirs[i].filename, O_RDONLY);
 		else if (cmd->redirs[i].type == HEREDOC)
 			fd = cmd->redirs[i].fd;
-		if (fd == -1)
+		if (fd < 0)
 		{
 			perror(cmd->redirs[i].filename);
-			return (1);
+			if (errno == ENOENT)
+				return (g_data->exit_status = 1);
+			if (errno == EACCES)
+				return (g_data->exit_status = 126);
+			return (g_data->exit_status = 1);
 		}
 		if (cmd->redirs[i].type == REDIRECT_IN
 			|| cmd->redirs[i].type == HEREDOC)

@@ -11,7 +11,9 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
+#include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 /*
  * In C convention, '\'' represents a single quote (e.g: " ' ")
  * Like, every "valid escapes" character can be isloated this way.
@@ -20,22 +22,6 @@
  * -> \', \", \\, \n, \t, \0
  *
  */
-char	*handle_single_quotes(char *arg)
-{
-	int		i;
-	int		len;
-
-	len = ft_strlen(arg);
-	i = 0;
-	while (arg[i])
-	{
-		if (arg[0] == '\'' && arg[len - 1] == '\'')
-			return (ft_substr(arg, 1, len - 2));
-		i++;
-	}
-	return (arg);
-}
-
 char	*extract_var_name(const char *s)
 {
 	int	len;
@@ -70,83 +56,106 @@ char	*ft_strjoin_free(char *s1, const char *s2)
  * 3 ) Substition of strings if no characters looked for found
  *
  */
-char	*expand_double_quoted(const char *s, t_env **env)
+char	*expand_argument(const char *s, t_env **env)
 {
-	char	*result;
-	int		i;
-	char	*tmp;
-	char	*name;
-	char	*value;
-	char	*exit_status;
+	t_exp		state;
 
-	result = ft_strdup("");
-	i = 0;
-	while (s[i])
+	state.result = ft_strdup("");
+	state.in_single = false;
+	state.in_double = false;
+	state.i = 0;
+	while (s[state.i])
 	{
-		if (s[i] == '\\' && (s[i + 1] == '$'
-				|| s[i + 1] == '"' || s[i + 1] == '\\'))
+		if (s[state.i] == '\\' && !state.in_single)
+			handle_escape(s, &state);
+		else if (s[state.i] == '\'')
 		{
-			tmp = ft_substr(s, i + 1, 1);
-			result = ft_strjoin_free(result, tmp);
-			free(tmp);
-			i += 2;
-		}
-		else if (s[i] == '$' && s[i + 1] == '?'
-			&& (i == 0 || s[i - 1] != '$'))
-		{
-			exit_status = ft_itoa(g_status);
-			result = ft_strjoin_free(result, exit_status);
-			free(exit_status);
-			i += 2;
-		}
-		else if (s[i] == '$')
-		{
-			i++;
-			name = extract_var_name(&s[i]);
-			if (!name)
-			{
-				result = ft_strjoin_free(result, "$");
-				continue ;
-			}
-			if (ft_strlen(name) == 0)
-			{
-				free(name);
-				result = ft_strjoin_free(result, "$");
-				continue ;
-			}
-			value = get_env_value(*env, name);
-			if (value)
-				result = ft_strjoin_free(result, value);
+			if (state.in_double)
+				append_char(&state, s[state.i]);
 			else
-				result = ft_strjoin_free(result, "");
-			i += ft_strlen(name);
-			free(name);
+				handle_quote(s[state.i], &state);
 		}
-		else
+		else if (s[state.i] == '"')
 		{
-			tmp = ft_substr(s, i, 1);
-			result = ft_strjoin_free(result, tmp);
-			free(tmp);
-			i++;
+			if (state.in_single)
+				append_char(&state, s[state.i]);
+			else
+				handle_quote(s[state.i], &state);
 		}
+		else if (s[state.i] == '$' && !state.in_single)
+			handle_dollar(s, &state, env);
+		else
+			append_char(&state, s[state.i]);
+		state.i++;
 	}
-	//ft_printf(">> expanding quotes: %s\n", s);
-	free((char *)s);
-	return (result);
+	return (state.result);
 }
 
-char	*handle_double_quotes(char *arg, t_env **env)
+void	handle_dollar(const char *s, t_exp *state, t_env **env)
 {
-	char	*stripped;
+	char	*var_part;
+	char	*var_name;
+	char	*var_value;
 
-	if (!arg || ft_strlen(arg) < 2)
-		return (ft_strdup(arg));
-	if (arg[0] == '"' && arg[ft_strlen(arg) - 1] == '"')
-		stripped = ft_substr(arg, 1, ft_strlen(arg) - 2);
+	state->i++;
+	var_name = NULL;
+	var_value = NULL;
+	var_part = NULL;
+	if (s[state->i] == '?')
+		var_part = ft_itoa(g_data->exit_status);
+	else if (ft_isalpha(s[state->i]) || s[state->i] == '_')
+	{
+		var_name = extract_var_name(s + state->i);
+		if (var_name)
+		{
+			var_value = get_env_value(*env, var_name);
+			state->i += ft_strlen(var_name);
+			if (var_value)
+				var_part = ft_strdup(var_value);
+			else
+				var_part = ft_strdup("");
+			free(var_name);
+		}
+	}
 	else
-		return (ft_strdup(arg));
-	if (!stripped)
-		return (NULL);
-	//ft_printf(">> stripped: = %s\n", stripped);
-	return (expand_double_quoted(stripped, env));
+		var_part = ft_strdup("$");
+	state->result = ft_strjoin_free(state->result, var_part);
+	free(var_part);
+}
+
+void	handle_quote(char quote, t_exp *state)
+{
+	if (quote == '\'')
+	{
+		if (!state->in_double)
+			state->in_single = !state->in_single;
+	}
+	else
+	{
+		if (!state->in_single)
+			state->in_double = !state->in_double;
+	}
+}
+
+void	handle_escape(const char *s, t_exp *state)
+{
+	if (s[state->i])
+	{
+		append_char(state, s[state->i]);
+		state->i++;
+	}
+}
+
+void	append_char(t_exp *state, char c)
+{
+	char	*joined;
+	char	tmp[2];
+
+	if (c == '\0')
+		return ;
+	tmp[0] = c;
+	tmp[1] = 0;
+	joined = ft_strjoin(state->result, tmp);
+	free(state->result);
+	state->result = joined;
 }

@@ -8,12 +8,15 @@ SRCS =  src/binary_tree/parsing/bt_parser.c				\
 		src/binary_tree/parsing/bt_parser_args.c 		\
 		src/binary_tree/parsing/bt_parser_helpers.c		\
 		src/binary_tree/tokens/token.c 				\
-		src/binary_tree/tokens/token_utils.c			\
+		src/binary_tree/tokens/token_utils.c		\
+		src/binary_tree/tokens/wildcard_mgmt.c 		\
+		src/binary_tree/tokens/wildcard_utils.c 	\
 		src/binary_tree/init/init_tree.c 			\
+		src/binary_tree/init/init_data.c 			\
 		src/binary_tree/utils/free_tree.c 			\
 		src/binary_tree/utils/to_str_helper.c 		\
 		src/binary_tree/utils/signal_handler.c 		\
-		src/binary_tree/exec/exec_ops.c 				\
+		src/binary_tree/exec/exec_ops.c 			\
 		src/binary_tree/exec/exec_mgmt.c 			\
 		src/builtins/builtin_mgmt.c 			\
 		src/builtins/env/env_mgmt.c 			\
@@ -24,6 +27,7 @@ SRCS =  src/binary_tree/parsing/bt_parser.c				\
 		src/builtins/cd/cd_mgmt.c 				\
 		src/builtins/export/export_mgmt.c 		\
 		src/builtins/unset/unset_mgmt.c 		\
+		src/builtins/exit/exit_mgmt.c 			\
 		src/binary_tree/main.c
 
 OBJS = $(SRCS:.c=.o)

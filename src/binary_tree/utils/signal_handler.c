@@ -19,7 +19,8 @@ void	sigint_handler(int sig)
 	rl_on_new_line();
 	rl_replace_line("", 0);
 	rl_redisplay();
-	g_status = 130;
+	if (g_data)
+		g_data->exit_status = 130;
 }
 
 void	heredoc_sig_handler(int sig)

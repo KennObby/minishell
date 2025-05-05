@@ -5,13 +5,13 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: oilyine- <oleg.ilyine@student42.luxembour  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/02 23:08:31 by oilyine-          #+#    #+#             */
-/*   Updated: 2025/04/02 23:30:27 by oilyine-         ###   ########.fr       */
+/*   Created: 225/04/02 23:08:31 by oilyine-          #+#    #+#             */
+/*   Updated: 225/04/02 23:30:27 by oilyine-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
-#include <stdlib.h>
+#include <unistd.h>
 
 int	builtin_env(t_env *env)
 {
@@ -26,15 +26,12 @@ int	builtin_env(t_env *env)
 int	builtin_echo(t_node *cmd, t_env **env)
 {
 	int		i;
-	char	*expanded_arg;
 
 	(void)env;
 	i = 1;
 	while (cmd->args[i])
 	{
-		expanded_arg = handle_double_quotes(cmd->args[i], env);
-		ft_printf("%s", expanded_arg);
-		free(expanded_arg);
+		ft_printf("%s", cmd->args[i]);
 		if (cmd->args[i + 1])
 			ft_printf(" ");
 		i++;
@@ -62,20 +59,24 @@ int	is_parent_only_builtin(char *cmd)
 		|| !ft_strcmp(cmd, "export"));
 }
 
-int	exec_builtin(t_node *cmd, t_env **env)
+int	exec_builtin(t_data *d)
 {
-	if (!ft_strcmp(cmd->args[0], "env"))
-		return (builtin_env(*env));
-	if (!ft_strcmp(cmd->args[0], "pwd"))
-		return (builtin_pwd());
-	if (!ft_strcmp(cmd->args[0], "cd"))
-		return (builtin_cd(cmd, env));
-	if (!ft_strcmp(cmd->args[0], "echo"))
-		return (builtin_echo(cmd, env));
-	if (!ft_strcmp(cmd->args[0], "export"))
-		return (builtin_export(cmd, env));
-	if (!ft_strcmp(cmd->args[0], "unset"))
-		return (builtin_unset(cmd, env));
-	ft_printf(">>> running builtin: %s\n", cmd->args[0]);
+	char	*cmd;
+
+	cmd = d->root->args[0];
+	if (!ft_strcmp(cmd, "env"))
+		return (d->exit_status = builtin_env(d->env_list));
+	if (!ft_strcmp(cmd, "pwd"))
+		return (d->exit_status = builtin_pwd());
+	if (!ft_strcmp(cmd, "cd"))
+		return (d->exit_status = builtin_cd(d));
+	if (!ft_strcmp(cmd, "echo"))
+		return (d->exit_status = builtin_echo(d->root, &d->env_list));
+	if (!ft_strcmp(cmd, "export"))
+		return (d->exit_status = builtin_export(d));
+	if (!ft_strcmp(cmd, "unset"))
+		return (d->exit_status = builtin_unset(d->root, &d->env_list));
+	if (!ft_strcmp(cmd, "exit"))
+		return (d->exit_status = builtin_exit(d));
 	return (127);
 }

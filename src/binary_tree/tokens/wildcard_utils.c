@@ -1,45 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   unset_mgmt.c                                       :+:      :+:    :+:   */
+/*   wildcard_utils.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: oilyine- <oleg.ilyine@student42.luxembour  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/23 16:39:07 by oilyine-          #+#    #+#             */
-/*   Updated: 2025/04/23 16:43:46 by oilyine-         ###   ########.fr       */
+/*   Created: 2025/05/03 16:38:35 by oilyine-          #+#    #+#             */
+/*   Updated: 2025/05/03 16:39:41 by oilyine-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
 
-int	builtin_unset(t_node *cmd, t_env **env)
+bool	match_pattern(const char *str, const char *pattern)
 {
-	int		i;
-	t_env	*curr;
-	t_env	*prev;
-
-	i = 1;
-	while (cmd->args[i])
+	if (!str || !pattern)
+		return (false);
+	if (*pattern == '\0' && *str == '\0')
+		return (true);
+	if (*pattern == '*')
 	{
-		prev = NULL;
-		curr = *env;
-		while (curr)
-		{
-			if (ft_strcmp(curr->key, cmd->args[i]) == 0)
-			{
-				if (prev)
-					prev->next = curr->next;
-				else
-					*env = curr->next;
-				free(curr->key);
-				free(curr->value);
-				free(curr);
-				break ;
-			}
-			prev = curr;
-			curr = curr->next;
-		}
-		i++;
+		return (match_pattern(str, pattern + 1)
+			|| (*str && match_pattern(str + 1, pattern)));
 	}
-	return (0);
+	if (*pattern == *str)
+		return (match_pattern(str + 1, pattern + 1));
+	return (false);
 }

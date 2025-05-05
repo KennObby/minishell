@@ -17,61 +17,51 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-int	execute(t_node *node, t_env **env)
+int	execute(t_data *d)
 {
-	int	status;
+	char	*cmd;
 
-	if (!node)
+	if (d->exit_status != 0)
+		return (d->exit_status);
+	if (!d->root)
 	{
 		ft_putendl_fd("minishell: NULL command node", 2);
 		return (127);
 	}
-	if (node->type == CMD)
+	if (d->root->type == CMD)
 	{
-		if (is_parent_only_builtin(node->args[0]))
-		{
-			status = execute_is_parent_only_builtin(node, env);
-			return (status);
-		}
-		else if (is_forkable_builtin(node->args[0]))
-			return (execute_forked_builtin(node, env));
-		else
-			return (execute_cmd(node, *env));
+		cmd = d->root->args[0];
+		//printf("[EXEC_CMD] Running binary: '%s'\n", d->root->args[0]);
+		if (is_parent_only_builtin(cmd))
+			return (execute_is_parent_only_builtin(d));
+		if (is_forkable_builtin(cmd))
+			return (execute_forked_builtin(d));
+		return (execute_cmd(d));
 	}
-	if (node->type == PIPE)
-		return (execute_pipe(node, *env));
-	if (node->type == SEMICOLON)
-		return (execute_semicolon(node, *env));
-	if (node->type == LOGICAL_AND || node->type == LOGICAL_OR)
-		return (execute_logical(node, *env));
+	if (d->root->type == PIPE)
+		return (execute_pipe(d));
+	if (d->root->type == SEMICOLON)
+		return (execute_semicolon(d));
+	if (d->root->type == LOGICAL_AND || d->root->type == LOGICAL_OR)
+		return (execute_logical(d));
 	return (0);
 }
 
-int	execute_is_parent_only_builtin(t_node *cmd, t_env **env)
+int	execute_is_parent_only_builtin(t_data *d)
 {
-	int	status;
-	int	saved_in;
-	int	saved_out;
-
-	saved_in = dup(STDIN_FILENO);
-	saved_out = dup(STDOUT_FILENO);
-	if (handle_redirections(cmd) != 0)
+	if (handle_redirections(d->root) != 0)
 	{
-		dup2(saved_in, STDIN_FILENO);
-		dup2(saved_out, STDOUT_FILENO);
-		close(saved_in);
-		close(saved_out);
+		dup2(d->stdin_backup, STDIN_FILENO);
+		dup2(d->stdout_backup, STDOUT_FILENO);
 		return (1);
 	}
-	status = exec_builtin(cmd, env);
-	dup2(saved_in, STDIN_FILENO);
-	dup2(saved_out, STDOUT_FILENO);
-	close(saved_in);
-	close(saved_out);
-	return (status);
+	d->exit_status = exec_builtin(d);
+	dup2(d->stdin_backup, STDIN_FILENO);
+	dup2(d->stdout_backup, STDOUT_FILENO);
+	return (d->exit_status);
 }
 
-int	execute_forked_builtin(t_node *cmd, t_env **env)
+int	execute_forked_builtin(t_data *d)
 {
 	pid_t	pid;
 	int		status;
@@ -84,9 +74,9 @@ int	execute_forked_builtin(t_node *cmd, t_env **env)
 	}
 	if (pid == 0)
 	{
-		if (handle_redirections(cmd) != 0)
+		if (handle_redirections(d->root) != 0)
 			exit(1);
-		exit(exec_builtin(cmd, env));
+		exit(exec_builtin(d));
 	}
 	waitpid(pid, &status, 0);
 	if (WIFEXITED(status))

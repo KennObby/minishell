@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
+#include <stdbool.h>
 #include <stdlib.h>
 
 int	print_export(t_env *env)
@@ -33,35 +34,56 @@ int	print_export(t_env *env)
 	return (0);
 }
 
-int	builtin_export(t_node *cmd, t_env **env)
+bool	is_valid_identifier(const char *s)
+{
+	if (!s || (!ft_isalpha(*s) && *s != '_'))
+		return (false);
+	s++;
+	while (*s)
+	{
+		if (*s == '=')
+			break ;
+		if (!ft_isalnum(*s) && *s != '_')
+			return (false);
+		s++;
+	}
+	return (true);
+}
+
+int	builtin_export(t_data *d)
 {
 	int		i;
 	char	*key;
 	char	*value;
-	char	*stripped;
 	char	*eq;
 
-	if (!cmd->args[1])
-		return (print_export(*env));
+	if (!d->root->args[1])
+		return (print_export(d->env_list));
+	d->exit_status = 0;
 	i = 1;
-	while (cmd->args[i])
+	while (d->root->args[i])
 	{
-		eq = ft_strchr(cmd->args[i], '=');
+		eq = ft_strchr(d->root->args[i], '=');
 		if (eq)
 		{
-			key = ft_substr(cmd->args[i], 0, eq - cmd->args[i]);
+			key = ft_substr(d->root->args[i], 0, eq - d->root->args[i]);
 			value = ft_strdup(eq + 1);
-			if (value[0] == '"' && value[ft_strlen(value) - 1] == '"')
-			{
-				stripped = ft_substr(value, 1, ft_strlen(value) - 2);
-				free(value);
-				value = stripped;
-			}
-			update_or_add_env(env, key, value);
-			free(key);
-			free(value);
 		}
+		else
+		{
+			key = ft_strdup(d->root->args[i]);
+			value = ft_strdup("");
+		}
+		if (!is_valid_identifier(key))
+		{
+			ft_putendl_fd("not a valid identifier", 2);
+			d->exit_status = 1;
+		}
+		else
+			update_or_add_env(&d->env_list, key, value);
+		free(key);
+		free(value);
 		i++;
 	}
-	return (0);
+	return (d->exit_status);
 }

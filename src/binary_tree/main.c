@@ -15,10 +15,10 @@
 #include <readline/readline.h>
 #include <signal.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
-
-int	g_status = 0;
 
 char	*built_prompt(t_env *env)
 {
@@ -62,104 +62,98 @@ void	remove_newline(char *str)
  * !! -> Maybe considering to add env_list in s_env struct
  *
  */
-void	inter_mode(t_env *env_list)
+void	inter_mode(t_data *d)
 {
-	char		*input;
-	char		*prompt;
-	t_token		*tokens;
-	t_node		*root;
-	t_parser	parser;
-
 	while (1)
 	{
-		prompt = built_prompt(env_list);
+		d->prompt = built_prompt(d->env_list);
 		setup_signals();
 		signal(SIGQUIT, SIG_IGN);
-		input = readline(prompt);
-		free(prompt);
-		if (!input)
+		d->input = readline(d->prompt);
+		free(d->prompt);
+		if (!d->input)
 		{
 			ft_putendl_fd("exit", 1);
 			break ;
 		}
-		if (ft_strlen(input))
-			add_history(input);
-		tokens = tokenize(input);
-		free(input);
-		if (!tokens)
+		if (*d->input)
+			add_history(d->input);
+		d->tokens = tokenize(d->input);
+		free(d->input);
+		if (!d->tokens)
 			continue ;
-		parser = (t_parser){tokens, 0};
-		root = parse(&parser);
-		if (!root)
+		d->parser = (t_parser){d->tokens, 0};
+		d->root = parse(&d->parser);
+		if (!d->root)
 		{
-			free_tokens(tokens);
-			g_status = 2;
+			free_tokens(d->tokens);
+			d->exit_status = 2;
 			continue ;
 		}
-		expand_node_args(root, env_list);
-		prepare_heredocs(root);
-		g_status = execute(root, &env_list);
-		free_tokens(tokens);
-		free_tree(root);
+		expand_node_args(d->root, d->env_list, &d->exit_status);
+		expand_wildcards_node(d->root);
+		prepare_heredocs(d->root);
+		d->exit_status = execute(d);
+		free_tokens(d->tokens);
+		free_tree(d->root);
 	}
 }
 
-void	non_inter_mode(t_env *env_list)
+void	non_inter_mode(t_data *d)
 {
-	char		*input;
-	t_token		*tokens;
-	t_node		*root;
-	t_parser	parser;
+	char	*line;
 
 	setup_signals();
-	input = get_next_line(0);
-	while (input != NULL)
+	line = get_next_line(0);
+	while (line != NULL)
 	{
-		if (input[0] == '\0' || input[0] == '\n')
+		if (line[0] == '\0' || line[0] == '\n')
 		{
-			free(input);
-			input = get_next_line(0);
+			free(line);
+			line = get_next_line(0);
 			continue ;
 		}
-		remove_newline(input);
-		tokens = tokenize(input);
-		free(input);
-		if (!tokens)
+		remove_newline(line);
+		d->tokens = tokenize(line);
+		free(line);
+		if (!d->tokens)
 		{
-			input = get_next_line(0);
+			line = get_next_line(0);
 			continue ;
 		}
-		parser = (t_parser){tokens, 0};
-		root = parse(&parser);
-		if (!root)
+		d->parser = (t_parser){d->tokens, 0};
+		d->root = parse(&d->parser);
+		if (!d->root)
 		{
-			free_tokens(tokens);
-			input = get_next_line(0);
-			g_status = 2;
+			d->exit_status = 2;
+			line = get_next_line(0);
+			free_tokens(d->tokens);
 			continue ;
 		}
-		expand_node_args(root, env_list);
-		prepare_heredocs(root);
-		g_status = execute(root, &env_list);
-		free_tokens(tokens);
-		free_tree(root);
-		input = get_next_line(0);
+		expand_node_args(d->root, d->env_list, &d->exit_status);
+		prepare_heredocs(d->root);
+		d->exit_status = execute(d);
+		free_tokens(d->tokens);
+		free_tree(d->root);
+		line = get_next_line(0);
 	}
 }
 
 int	main(int ac, char **av, char **envp)
 {
-	t_env		*env_list;
+	t_data	data;
 
 	(void)ac;
 	(void)av;
-	env_list = init_env_list(envp);
-	bump_shlvl(env_list);
+	init_data(&data, envp);
+	bump_shlvl(data.env_list);
 	if (!isatty(0))
-		non_inter_mode(env_list);
+		non_inter_mode(&data);
 	else
-		inter_mode(env_list);
-	free_env_list(env_list);
+		inter_mode(&data);
+	free_env_list(data.env_list);
 	rl_clear_history();
-	return (g_status);
+	close(data.stdin_backup);
+	close(data.stdout_backup);
+	return (data.exit_status);
 }

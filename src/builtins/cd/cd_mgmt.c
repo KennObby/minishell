@@ -12,9 +12,10 @@
 
 #include "../../../inc/minishell.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
-char	*handle_cd_path(t_node *cmd, t_env **env)
+char	*handle_cd_path(t_data *d)
 {
 	char	*path;
 	int		count;
@@ -23,75 +24,80 @@ char	*handle_cd_path(t_node *cmd, t_env **env)
 	char	*expanded;
 
 	count = 0;
-	while (cmd->args[count])
+	while (d->root->args[count])
 		count++;
 	if (count > 2)
 	{
-		ft_printf("cd: too many arguments\n");
+		ft_putendl_fd("bash: cd : too many arguments", 2);
+		d->exit_status = 1;
 		return (NULL);
 	}
 	if (count == 1)
 	{
-		path = get_env_value(*env, "HOME");
+		path = get_env_value(d->env_list, "HOME");
 		if (!path)
 		{
-			ft_printf("cd: HOME not set\n");
+			ft_putendl_fd("cd: HOME not set\n", 2);
+			d->exit_status = 1;
 			return (NULL);
 		}
 		return (ft_strdup(path));
 	}
-	if (ft_strcmp(cmd->args[1], "-") == 0)
+	if (ft_strcmp(d->root->args[1], "-") == 0)
 	{
-		path = get_env_value(*env, "OLDPWD");
+		path = get_env_value(d->env_list, "OLDPWD");
 		if (!path)
 		{
 			ft_printf("cd: OLDPWD not set\n");
+			d->exit_status = 1;
 			return (NULL);
 		}
 		ft_printf("%s\n", path);
 		return (ft_strdup(path));
 	}
-	if (cmd->args[1][0] == '~')
+	if (d->root->args[1][0] == '~')
 	{
-		home = get_env_value(*env, "HOME");
+		home = get_env_value(d->env_list, "HOME");
 		if (!home)
 		{
 			ft_printf("cd: HOME not set");
+			d->exit_status = 1;
 			return (NULL);
 		}
-		suffix = cmd->args[1] + 1;
+		suffix = d->root->args[1] + 1;
 		expanded = ft_strjoin(home, suffix);
 		return (expanded);
 	}
-	return (ft_strdup(cmd->args[1]));
+	return (ft_strdup(d->root->args[1]));
 }
 
-int	builtin_cd(t_node *cmd, t_env **env)
+int	builtin_cd(t_data *d)
 {
+	int		status;
 	char	*target;
 	char	*old_pwd;
 	char	cwd[MAX_PATH];
 
-	target = handle_cd_path(cmd, env);
+	target = handle_cd_path(d);
+	status = d->exit_status;
 	if (!target)
-		return (1);
+		exit(status = 1);
 	if (chdir(target) == -1)
 	{
-		ft_printf("cd: %s: ", target);
-		perror("");
+		ft_putendl_fd("No such file or directory", 2);
 		free(target);
-		return (1);
+		exit(status = 1);
 	}
-	old_pwd = get_env_value(*env, "PWD");
+	old_pwd = get_env_value(d->env_list, "PWD");
 	if (!getcwd(cwd, sizeof(cwd)))
 	{
-		ft_printf("cd: error retrieving current directory");
+		ft_putendl_fd("cd: error retrieving current directory", 2);
 		free(target);
-		return (1);
+		exit(status = 1);
 	}
 	if (old_pwd)
-		update_or_add_env(env, "OLDPWD", old_pwd);
-	update_or_add_env(env, "PWD", cwd);
+		update_or_add_env(&d->env_list, "OLDPWD", old_pwd);
+	update_or_add_env(&d->env_list, "PWD", cwd);
 	free(target);
 	return (0);
 }

@@ -14,6 +14,7 @@
 # define MINISHELL_H
 
 //< ----------------------- INCLUDES -------------------- >
+#include <readline/chardefs.h>
 # include <stdio.h>
 # include <stdint.h>
 # include <stdarg.h>
@@ -29,11 +30,10 @@
 # include <dirent.h>
 # include <termios.h>
 # include <errno.h>
+# include <dirent.h>
 # include "../Libft/libft.h"
 # include "../Libft/ft_printf.h"
 # include "../Libft/get_next_line_bonus.h"
-
-extern int	g_status;
 
 //< ----------------------- STRUCTS --------------------- >
 
@@ -68,6 +68,7 @@ typedef enum e_type
 	GROUPING,
 	GROUPING_OPEN,
 	GROUPING_CLOSE,
+	WILDCARD,
 	END,
 	NB_TYPES,
 }				t_type;
@@ -120,6 +121,14 @@ typedef struct s_parser
 	int		pos;
 }				t_parser;
 
+typedef struct s_exp
+{
+	char	*result;
+	bool	in_single;
+	bool	in_double;
+	int		i;
+}				t_exp;
+
 /* 
  * In case we need to update PWD (pwd) and OLDPWD (called by cd -)
  * We will probably need to use struct for pwd in the builtin_pwd() function
@@ -149,19 +158,46 @@ typedef struct s_node
 	char			**args;
 	t_redir			*redirs;
 	int				redir_count;
+	t_list			*args_list;
 	struct s_node	*writer;
 	struct s_node	*reader;
 }				t_node;
 
+typedef struct s_data
+{
+	pid_t		pid;
+	t_env		*env_list;
+	t_node		*cmd_tree;
+	t_token		*tokens;
+	t_parser	parser;
+	t_node		*root;
+	char		*line;
+	char		*prompt;
+	char		*input;
+	int			**pipes;
+	int			nb_pipes;
+	int			stdin_backup;
+	int			stdout_backup;
+	int			exit_status;
+}				t_data;
+
+extern t_data	*g_data;
+
 # define MAX_TOKENS 1024
 # define MAX_ARGS 1024
 # define MAX_PATH 1024
+
+void		debug_print_tree(t_node *node, int indent);
+
 //< --------------------------- FUNCTIONS --------------------- >
 //
 //< --------------------------- BINARY TREE ------------------- >
 //< --------------------------- init_tree.c ------------------- >
 t_node		*create_leaf(char **args);
 t_node		*create_node(t_type type, t_node *left, t_node *right);
+
+//< --------------------------- init_data.c ------------------- >
+void		init_data(t_data *data, char **envp);
 
 //< --------------------------- bt_parser_utils.c ------------- >
 t_type		peek(t_parser *parser);
@@ -194,7 +230,7 @@ t_node		*parse_grouping(t_parser *parser);
 t_node		*parse(t_parser *parser);
 
 //< --------------------------- bt_parser_args.c -------------- >
-void		expand_node_args(t_node *node, t_env *env);
+void		expand_node_args(t_node *node, t_env *env, int *status);
 
 //< --------------------------- token.c ----------------------- >
 t_token		create_token(t_type type, char *val);
@@ -207,17 +243,29 @@ int			is_operator(char c);
 bool		has_no_space_after(const char *input, int pos);
 int			is_control_token(t_type type);
 bool		should_merge(t_token prev, t_token next);
+bool		contains_wildcards(const char *word);
+
+//< -------------------------- wildcards_utils.c -------------- >
+bool		match_pattern(const char *str, const char *pattern);
+
+//< -------------------------- wildcard_mgmt.c ---------------- >
+t_list		*expand_wildcards(const char *pattern);
+t_list		*build_list_from_args(char **args);
+char		**list_to_args_array(t_list *list);
+void		process_single_argument(char *arg, t_list **new_args);
+void		expand_wildcards_node(t_node *node);
 
 //< --------------------------- free_tree.c ------------------- >
 void		free_tree(t_node *node);
 void		free_tokens(t_token *tokens);
-void		free_args(char **args, int count);
+void		free_args(char **args);
 
 //< --------------------------- main.c ------------------------ >
 char		*build_prompt(t_env *env);
 void		remove_newline(char	*str);
-void		inter_mode(t_env *env_list);
-void		non_inter_mode(t_env *env_list);
+char		*read_full_stdin(void);
+void		inter_mode(t_data *d);
+void		non_inter_mode(t_data *d);
 
 //< --------------------------- to_str_helper.c --------------- >
 const char	*redir_type_str(t_type type);
@@ -228,16 +276,16 @@ void		print_tree(t_node *node, int depth);
 void		heredoc_sig_handler(int sig);
 
 //< --------------------------- exec_ops.c -------------------- >
-int			execute_cmd(t_node *cmd, t_env *env_list);
-int			execute_pipe(t_node *pipe_node, t_env *env);
-int			execute_logical(t_node *logical_node, t_env *env);
-int			execute_semicolon(t_node *semi_node, t_env *env);
+int			execute_cmd(t_data *d);
+int			execute_pipe(t_data *d);
+int			execute_logical(t_data *d);
+int			execute_semicolon(t_data *d);
 int			handle_redirections(t_node *cmd);
 
 //< --------------------------- exec_mgmt.c ------------------- >
-int			execute(t_node *node, t_env **env);
-int			execute_forked_builtin(t_node *cmd, t_env **env);
-int			execute_is_parent_only_builtin(t_node *cmd, t_env **env);
+int			execute(t_data *d);
+int			execute_forked_builtin(t_data *d);
+int			execute_is_parent_only_builtin(t_data *d);
 void		prepare_heredocs(t_node *node);
 int			handle_heredoc(char *delimiter);
 
@@ -269,22 +317,28 @@ void		free_str_array(char **arr);
 int			builtin_pwd(void);
 
 //< --------------------------- cd_mgmt.c --------------------- >
-char		*handle_cd_path(t_node *cmd, t_env **env);
-int			builtin_cd(t_node *cmd, t_env **env);
+char		*handle_cd_path(t_data *d);
+int			builtin_cd(t_data *d);
 
 //< --------------------------- echo_mgmt.c ------------------- >
-char		*handle_single_quotes(char *arg);
 char		*extract_var_name(const char *s);
 char		*ft_strjoin_free(char *s1, const char *s2);
-char		*expand_double_quoted(const char *s, t_env **env);
-char		*handle_double_quotes(char *arg, t_env **env);
+char		*expand_argument(const char *s, t_env **env);
+void		handle_dollar(const char *s, t_exp *state, t_env **env);
+void		handle_quote(char quote, t_exp *state);
+void		handle_escape(const char *s, t_exp *state);
+void		append_char(t_exp *state, char c);
 
 //< --------------------------- export_mgmt.c ----------------- >
 int			print_export(t_env *env);
-int			builtin_export(t_node *cmd, t_env **env);
+int			builtin_export(t_data *d);
 
 //< --------------------------- unset_mgmt.c ------------------ >
 int			builtin_unset(t_node *cmd, t_env **env);
+
+//< --------------------------- exit_mgmt.c ------------------- >
+void		exit_mgmt(t_data *d);
+int			builtin_exit(t_data *d);
 
 //< --------------------------- builtin_utils.c --------------- >
 int			is_builtin(char *cmd);
@@ -294,6 +348,6 @@ int			builtin_env(t_env *env);
 int			builtin_echo(t_node *cmd, t_env **env);
 int			is_forkable_builtin(char *cmd);
 int			is_parent_only_builtin(char *cmd);
-int			exec_builtin(t_node *cmd, t_env **env);
+int			exec_builtin(t_data *d);
 
 #endif

@@ -11,32 +11,34 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
-#include <stdlib.h>
 
-void	expand_node_args(t_node *node, t_env *env)
+void	expand_node_args(t_node *node, t_env *env, int *status)
 {
 	int		i;
-	char	*expanded;
+	char	*exp;
 
-	if (!node || node->type != CMD || !node->args)
+	if (!node)
 		return ;
-	expand_node_args(node->reader, env);
-	expand_node_args(node->writer, env);
+	if (node->writer)
+		expand_node_args(node->writer, env, status);
+	if (node->reader)
+		expand_node_args(node->reader, env, status);
 	i = 0;
-	while (node->args && node->args[i])
+	if (node->type == CMD && node->args)
 	{
-		expanded = NULL;
-		if (node->args[i][0] == '\'' && ft_strlen(node->args[i]) >= 2)
-			expanded = handle_single_quotes(node->args[i]);
-		else if (node->args[i][0] == '"' && ft_strlen(node->args[i]) >= 2)
-			expanded = handle_double_quotes(node->args[i], &env);
-		else if (ft_strchr(node->args[i], '$') && ft_strlen(node->args[i]) >= 2)
-			expanded = expand_double_quoted(ft_strdup(node->args[i]), &env);
-		if (expanded)
+		while (i < node->redir_count)
 		{
-			free(node->args[i]);
-			node->args[i] = expanded;
+			exp = expand_argument(node->redirs[i].filename,
+					&env);
+			node->redirs[i].filename = exp;
+			i++;
 		}
-		i++;
+		i = 0;
+		while (node->args[i])
+		{
+			exp = expand_argument(node->args[i], &env);
+			node->args[i] = exp;
+			i++;
+		}
 	}
 }

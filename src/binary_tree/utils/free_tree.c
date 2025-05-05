@@ -56,14 +56,14 @@ void	free_tokens(t_token	*tokens)
 	free(tokens);
 }
 
-void	free_args(char **args, int count)
+void	free_args(char **args)
 {
 	int	i;
 
 	if (!args)
 		return ;
 	i = 0;
-	while (i < count)
+	while (args[i])
 	{
 		free(args[i]);
 		i++;

@@ -12,6 +12,7 @@
 
 #include "../../../inc/minishell.h"
 #include <stdbool.h>
+#include <stdlib.h>
 
 t_token	create_token(t_type type, char *val)
 {
@@ -25,40 +26,34 @@ t_token	create_token(t_type type, char *val)
 
 int	tokenize_word(char *input, t_token *tokens, int i, int *pos)
 {
-	int		start;
-	char	*value;
-	char	quote;
+	bool	in_quote;
+	char	quote_char;
+	char	*start;
+	int		len;
+	char	c;
 
-	start = *pos;
-	if (input[*pos] == '\'' || input[*pos] == '"')
+	start = &input[*pos];
+	quote_char = 0;
+	in_quote = false;
+	while (input[*pos])
 	{
-		quote = input[(*pos)++];
-		while (input[*pos] && input[*pos] != quote)
-			(*pos)++;
-		if (input[*pos] == quote)
-			(*pos)++;
-	}
-	else
-	{
-		while (input[*pos] && !ft_isspace(input[*pos])
-			&& !is_operator(input[*pos]))
+		c = input[*pos];
+		if (!in_quote && (ft_isspace(c) || is_operator(c)))
+			break ;
+		if (c == '\'' || c == '"')
 		{
-			if (input[*pos] == '=' && (input[*pos + 1] == '"'
-					|| input[*pos + 1] == '\''))
+			if (!in_quote)
 			{
-				(*pos)++;
-				quote = input[(*pos)++];
-				while (input[*pos] && input[*pos] != quote)
-					(*pos)++;
-				if (input[*pos] == quote)
-					(*pos)++;
-				break ;
+				in_quote = true;
+				quote_char = c;
 			}
-			(*pos)++;
+			else if (c == quote_char)
+				in_quote = false;
 		}
+		(*pos)++;
 	}
-	value = ft_substr(input, start, *pos - start);
-	tokens[i] = create_token(WORD, value);
+	len = &input[*pos] - start;
+	tokens[i] = create_token(WORD, ft_substr(start, 0, len));
 	tokens[i].has_no_space_after = has_no_space_after(input, *pos);
 	return (i + 1);
 }

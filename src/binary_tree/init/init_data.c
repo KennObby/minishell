@@ -1,45 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   unset_mgmt.c                                       :+:      :+:    :+:   */
+/*   init_data.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: oilyine- <oleg.ilyine@student42.luxembour  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/23 16:39:07 by oilyine-          #+#    #+#             */
-/*   Updated: 2025/04/23 16:43:46 by oilyine-         ###   ########.fr       */
+/*   Created: 2025/05/01 11:43:56 by oilyine-          #+#    #+#             */
+/*   Updated: 2025/05/01 11:47:53 by oilyine-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
+#include <string.h>
+#include <unistd.h>
 
-int	builtin_unset(t_node *cmd, t_env **env)
+t_data	*g_data = NULL;
+
+void	init_data(t_data *d, char **envp)
 {
-	int		i;
-	t_env	*curr;
-	t_env	*prev;
-
-	i = 1;
-	while (cmd->args[i])
-	{
-		prev = NULL;
-		curr = *env;
-		while (curr)
-		{
-			if (ft_strcmp(curr->key, cmd->args[i]) == 0)
-			{
-				if (prev)
-					prev->next = curr->next;
-				else
-					*env = curr->next;
-				free(curr->key);
-				free(curr->value);
-				free(curr);
-				break ;
-			}
-			prev = curr;
-			curr = curr->next;
-		}
-		i++;
-	}
-	return (0);
+	g_data = d;
+	d->pid = 0;
+	d->env_list = init_env_list(envp);
+	d->tokens = NULL;
+	d->root = NULL;
+	d->input = NULL;
+	d->prompt = NULL;
+	d->exit_status = 0;
+	d->pipes = NULL;
+	d->nb_pipes = 0;
+	d->stdin_backup = dup(STDIN_FILENO);
+	d->stdout_backup = dup(STDOUT_FILENO);
 }

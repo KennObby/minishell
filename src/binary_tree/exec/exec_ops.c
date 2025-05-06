@@ -25,13 +25,12 @@ int	execute_cmd(t_data *d)
 	char	*path;
 	int		redir_status;
 	int		status;
-	int		sig;
 
 	pid = fork();
 	if (pid < 0)
 	{
 		perror("minishell");
-		return (d->exit_status = 1);
+		return (g_data->exit_status = 1);
 	}
 	if (pid == 0)
 	{
@@ -40,7 +39,7 @@ int	execute_cmd(t_data *d)
 		{
 			dup2(d->stdin_backup, STDIN_FILENO);
 			dup2(d->stdout_backup, STDOUT_FILENO);
-			d->exit_status = redir_status;
+			g_data->exit_status = redir_status;
 			exit(redir_status);
 		}
 		envp = env_list_to_array(d->env_list);
@@ -51,7 +50,7 @@ int	execute_cmd(t_data *d)
 		}
 		if (ft_strchr(d->root->args[0], '/'))
 		{
-			if (access(d->root->args[0], X_OK) == 0)
+			if (access(d->root->args[0], X_OK) == 0 && access(d->root->args[0], F_OK))
 			{
 				reset_signals();
 				execve(d->root->args[0], d->root->args, envp);
@@ -71,17 +70,12 @@ int	execute_cmd(t_data *d)
 	}
 	waitpid(pid, &status, 0);
 	if (WIFEXITED(status))
-		d->exit_status = WEXITSTATUS(status);
+		g_data->exit_status = WEXITSTATUS(status);
 	else if (WIFSIGNALED(status))
-	{
-		sig = WTERMSIG(status);
-		if (sig == SIGQUIT)
-			ft_putstr_fd("Quit:3\n", 2);
-		else if (sig == SIGINT)
-			ft_putchar_fd('\n', 2);
-		return (d->exit_status = 128 + sig);
-	}
-	return (d->exit_status);
+		return (g_data->exit_status = 128 + WTERMSIG(status));
+	else
+		g_data->exit_status = 1;
+	return (g_data->exit_status);
 }
 
 int	execute_pipe(t_data *d)
@@ -120,12 +114,12 @@ int	execute_pipe(t_data *d)
 	waitpid(pid_left, &status_left, 0);
 	waitpid(pid_right, &status_right, 0);
 	if (WIFEXITED(status_right))
-		d->exit_status = WEXITSTATUS(status_right);
+		g_data->exit_status = WEXITSTATUS(status_right);
 	else if (WIFSIGNALED(status_right))
-		d->exit_status = 128 + WTERMSIG(status_right);
+		g_data->exit_status = 128 + WTERMSIG(status_right);
 	else
-		d->exit_status = 1;
-	return (d->exit_status);
+		g_data->exit_status = 1;
+	return (g_data->exit_status);
 }
 
 int	execute_logical(t_data *d)
@@ -153,7 +147,7 @@ int	execute_logical(t_data *d)
 		}
 	}
 	d->root = saved;
-	return (d->exit_status = status);
+	return (g_data->exit_status = status);
 }
 
 int	execute_semicolon(t_data *d)
@@ -167,7 +161,7 @@ int	execute_semicolon(t_data *d)
 	d->root = saved->reader;
 	status = execute(d);
 	d->root = saved;
-	return (d->exit_status = status);
+	return (g_data->exit_status = status);
 }
 
 int	handle_redirections(t_node *cmd)

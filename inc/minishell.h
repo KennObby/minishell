@@ -14,7 +14,7 @@
 # define MINISHELL_H
 
 //< ----------------------- INCLUDES -------------------- >
-#include <readline/chardefs.h>
+# include <readline/chardefs.h>
 # include <stdio.h>
 # include <stdint.h>
 # include <stdarg.h>
@@ -271,9 +271,6 @@ void		non_inter_mode(t_data *d);
 const char	*redir_type_str(t_type type);
 const char	*type_to_str(t_type type);
 void		print_tree(t_node *node, int depth);
-
-//< --------------------------- exec_utils.c ------------------ >
-void		heredoc_sig_handler(int sig);
 
 //< --------------------------- exec_ops.c -------------------- >
 int			execute_cmd(t_data *d);

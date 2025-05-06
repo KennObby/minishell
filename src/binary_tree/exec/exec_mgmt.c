@@ -21,12 +21,10 @@ int	execute(t_data *d)
 {
 	char	*cmd;
 
-	if (d->exit_status != 0)
-		return (d->exit_status);
 	if (!d->root)
 	{
 		ft_putendl_fd("minishell: NULL command node", 2);
-		return (127);
+		return (g_data->exit_status = 127);
 	}
 	if (d->root->type == CMD)
 	{
@@ -55,10 +53,10 @@ int	execute_is_parent_only_builtin(t_data *d)
 		dup2(d->stdout_backup, STDOUT_FILENO);
 		return (1);
 	}
-	d->exit_status = exec_builtin(d);
+	g_data->exit_status = exec_builtin(d);
 	dup2(d->stdin_backup, STDIN_FILENO);
 	dup2(d->stdout_backup, STDOUT_FILENO);
-	return (d->exit_status);
+	return (g_data->exit_status);
 }
 
 int	execute_forked_builtin(t_data *d)

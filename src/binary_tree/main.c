@@ -87,13 +87,13 @@ void	inter_mode(t_data *d)
 		if (!d->root)
 		{
 			free_tokens(d->tokens);
-			d->exit_status = 2;
+			g_data->exit_status = 2;
 			continue ;
 		}
-		expand_node_args(d->root, d->env_list, &d->exit_status);
+		expand_node_args(d->root, d->env_list, &g_data->exit_status);
 		expand_wildcards_node(d->root);
 		prepare_heredocs(d->root);
-		d->exit_status = execute(d);
+		g_data->exit_status = execute(d);
 		free_tokens(d->tokens);
 		free_tree(d->root);
 	}
@@ -125,14 +125,14 @@ void	non_inter_mode(t_data *d)
 		d->root = parse(&d->parser);
 		if (!d->root)
 		{
-			d->exit_status = 2;
+			g_data->exit_status = 2;
 			line = get_next_line(0);
 			free_tokens(d->tokens);
 			continue ;
 		}
-		expand_node_args(d->root, d->env_list, &d->exit_status);
+		expand_node_args(d->root, d->env_list, &g_data->exit_status);
 		prepare_heredocs(d->root);
-		d->exit_status = execute(d);
+		g_data->exit_status = execute(d);
 		free_tokens(d->tokens);
 		free_tree(d->root);
 		line = get_next_line(0);

@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
-#include <string.h>
 
 void	free_tree(t_node *node)
 {
@@ -20,6 +19,7 @@ void	free_tree(t_node *node)
 	i = 0;
 	if (!node)
 		return ;
+	ft_printf("[FREE] Freeing node type: %d\n", node->type);
 	free_tree(node->writer);
 	free_tree(node->reader);
 	if (node->args)
@@ -36,10 +36,6 @@ void	free_tree(t_node *node)
 			free(node->redirs[i++].filename);
 		free(node->redirs);
 	}
-	node->args = NULL;
-	node->redirs = NULL;
-	node->writer = NULL;
-	node->reader = NULL;
 	free(node);
 }
 

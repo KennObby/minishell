@@ -16,6 +16,7 @@ t_node	*parse_semicolon(t_parser *parser)
 {
 	t_node	*left;
 	t_node	*right;
+	t_node	*new_node;
 
 	left = parse_logical(parser);
 	if (!left)
@@ -28,7 +29,10 @@ t_node	*parse_semicolon(t_parser *parser)
 		right = parse_semicolon(parser);
 		if (!right)
 			return (free_tree(left), left = NULL, NULL);
-		left = create_node(SEMICOLON, left, right);
+		new_node = create_node(SEMICOLON, left, right);
+		if (!new_node)
+			return (free_tree(left), free_tree(right), NULL);
+		left = new_node;
 	}
 	return (left);
 }
@@ -37,6 +41,7 @@ t_node	*parse_logical(t_parser *parser)
 {
 	t_node	*left;
 	t_node	*right;
+	t_node	*new_node;
 	t_type	op;
 
 	left = parse_pipeline(parser);
@@ -51,7 +56,10 @@ t_node	*parse_logical(t_parser *parser)
 		right = parse_logical(parser);
 		if (!right)
 			return (free_tree(left), left = NULL, NULL);
-		left = create_node(op, left, right);
+		new_node = create_node(op, left, right);
+		if (!new_node)
+			return (free_tree(left), free_tree(right), NULL);
+		left = new_node;
 	}
 	return (left);
 }
@@ -60,17 +68,23 @@ t_node	*parse_pipeline(t_parser *parser)
 {
 	t_node	*left;
 	t_node	*right;
+	t_node	*new_node;
+	t_type	op;
 
 	left = parse_grouping(parser);
 	while (peek(parser) == PIPE)
 	{
+		op = peek(parser);
 		consume(parser);
 		if (!expect_valid_token(parser))
-			return (free_tree(left), left = NULL, NULL);
+			return (free_tree(left), NULL);
 		right = parse_pipeline(parser);
 		if (!right)
-			return (free_tree(left), left = NULL, NULL);
-		left = create_node(PIPE, left, right);
+			return (free_tree(left), free_tree(right), NULL);
+		new_node = create_node(op, left, right);
+		if (!new_node)
+			return (free_tree(left), free_tree(right), NULL);
+		left = new_node;
 	}
 	return (left);
 }

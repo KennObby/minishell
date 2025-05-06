@@ -41,7 +41,7 @@ LDFLAGS = -L $(LIBFT_DIR) -L /usr/local/lib -lreadline -lft
 NAME = minishell
 RM = rm -rf
 
-VALGRIND = valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes
+VALGRIND = valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes --trace-children=yes
 SUPPRESS_FILE = readline.supp 
 
 all: $(LIBFT) $(NAME)

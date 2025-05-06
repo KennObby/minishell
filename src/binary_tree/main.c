@@ -94,6 +94,7 @@ void	inter_mode(t_data *d)
 		expand_wildcards_node(d->root);
 		prepare_heredocs(d->root);
 		g_data->exit_status = execute(d);
+		print_tree(d->root, 0);
 		free_tokens(d->tokens);
 		free_tree(d->root);
 	}

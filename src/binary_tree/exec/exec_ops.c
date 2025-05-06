@@ -50,7 +50,7 @@ int	execute_cmd(t_data *d)
 		}
 		if (ft_strchr(d->root->args[0], '/'))
 		{
-			if (access(d->root->args[0], X_OK) == 0 && access(d->root->args[0], F_OK))
+			if (access(d->root->args[0], X_OK))
 			{
 				reset_signals();
 				execve(d->root->args[0], d->root->args, envp);
@@ -80,6 +80,7 @@ int	execute_cmd(t_data *d)
 
 int	execute_pipe(t_data *d)
 {
+	t_node	*full_tree;
 	int		fd[2];
 	pid_t	pid_left;
 	pid_t	pid_right;
@@ -97,8 +98,12 @@ int	execute_pipe(t_data *d)
 		close(fd[0]);
 		dup2(fd[1], STDOUT_FILENO);
 		close(fd[1]);
-		d->root = d->root->writer;
-		exit(execute(d));
+		full_tree = d->root;
+		d->root = full_tree->writer;
+		status_left = execute(d);
+		free_tokens(d->tokens);
+		free_tree(full_tree);
+		exit(status_left);
 	}
 	pid_right = fork();
 	if (pid_right == 0)
@@ -106,8 +111,12 @@ int	execute_pipe(t_data *d)
 		close(fd[1]);
 		dup2(fd[0], STDIN_FILENO);
 		close(fd[0]);
-		d->root = d->root->reader;
-		exit(execute(d));
+		full_tree = d->root;
+		d->root = full_tree->reader;
+		status_right = execute(d);
+		free_tokens(d->tokens);
+		free_tree(full_tree);
+		exit(status_right);
 	}
 	close(fd[0]);
 	close(fd[1]);

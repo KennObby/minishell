@@ -47,6 +47,6 @@ t_node	*create_node(t_type type, t_node *left, t_node *right)
 	node->reader = right;
 	node->redirs = NULL;
 	node->redir_count = 0;
-	//ft_printf("[NODE] Created node of type: %d\n", type);
+	printf("[NODE CREATED] Created node of type: %d\n" "at %p\n", type, node);
 	return (node);
 }

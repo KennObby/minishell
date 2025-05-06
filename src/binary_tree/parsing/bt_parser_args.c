@@ -31,7 +31,7 @@ void	expand_node_args(t_node *node, t_env *env, int *status)
 		{
 			exp = expand_argument(node->redirs[i].filename,
 					&env);
-			free(node->args[i]);
+			free(node->redirs[i].filename);
 			node->redirs[i].filename = exp;
 			i++;
 		}

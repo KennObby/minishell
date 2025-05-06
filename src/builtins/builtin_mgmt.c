@@ -26,9 +26,18 @@ int	builtin_env(t_env *env)
 int	builtin_echo(t_node *cmd, t_env **env)
 {
 	int		i;
+	int		no_newline;
 
 	(void)env;
 	i = 1;
+	no_newline = 0;
+	if (cmd->args[1] && ft_strcmp(cmd->args[1], "-n") == 0)
+	{
+		no_newline = 1;
+		i++;
+	}
+	if (cmd->args[2] && ft_strcmp(cmd->args[2], "-n") == 0)
+		i++;
 	while (cmd->args[i])
 	{
 		ft_printf("%s", cmd->args[i]);
@@ -36,7 +45,8 @@ int	builtin_echo(t_node *cmd, t_env **env)
 			ft_printf(" ");
 		i++;
 	}
-	ft_printf("\n");
+	if (!no_newline)
+		ft_printf("\n");
 	return (0);
 }
 

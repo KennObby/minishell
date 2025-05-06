@@ -53,9 +53,6 @@ $(NAME): $(OBJS) $(LIBFT)
 		@echo "Compiling $@..."
 		@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) $(LDFLAGS)
 
-val: all
-	$(VALGRIND) --suppressions=$(SUPPRESS_FILE) ./minishell
-
 %.o: %.c
 		@echo "Compiling $@..."
 		@$(CC) $(CFLAGS) $(INC) -c $< -o $@
@@ -69,6 +66,9 @@ fclean: clean
 		@$(RM) $(NAME)
 
 re: fclean all
+
+val: re
+	$(VALGRIND) --suppressions=$(SUPPRESS_FILE) ./minishell
 
 .PHONY: all clean fclean re
 	

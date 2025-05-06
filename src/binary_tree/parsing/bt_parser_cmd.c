@@ -79,12 +79,12 @@ char	**collect_args(t_parser *parser, t_node *cmd_node, int *arg_count)
 		if (is_redirection(peek(parser)))
 		{
 			if (!parse_single_redirect(parser, cmd_node))
-				return (free(arg), free_args(args), NULL);
+				return (free_args(args), NULL);
 			continue ;
 		}
 		arg = merge_tokens(parser);
 		if (!arg)
-			return (free_args(args), NULL);
+			return (free(arg), free_args(args), NULL);
 		new_args = ft_realloc(args, n * sizeof * args,
 				(n + 1) * sizeof * args);
 		if (!new_args)
@@ -101,11 +101,11 @@ int	finalize_args(t_node *cmd, char **args, int arg_count)
 	char	**new_args;
 
 	if (!args && cmd->redir_count == 0)
-		return (free_tree(cmd), free_args(args), 0);
+		return (free_args(args), 0);
 	new_args = ft_realloc(args, arg_count * sizeof(char *),
 			(arg_count + 1) * sizeof(char *));
 	if (!new_args)
-		return (free_tree(cmd), free_args(args), 0);
+		return (free_args(args), 0);
 	new_args[arg_count] = NULL;
 	cmd->args = new_args;
 	return (1);
@@ -123,8 +123,10 @@ t_node	*parse_command(t_parser *parser)
 	if (!cmd_node)
 		return (NULL);
 	args = collect_args(parser, cmd_node, &arg_count);
+	if (!args)
+		return (free_tree(cmd_node), NULL);
 	if (!finalize_args(cmd_node, args, arg_count))
-		return (free_tree(cmd_node), free_args(args), NULL);
+		return (NULL);
 	if (arg_count == 0 && cmd_node->redir_count == 0)
 	{
 		free_tree(cmd_node);

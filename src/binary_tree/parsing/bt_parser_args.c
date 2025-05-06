@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
+#include <stdlib.h>
 
 void	expand_node_args(t_node *node, t_env *env, int *status)
 {
@@ -30,6 +31,7 @@ void	expand_node_args(t_node *node, t_env *env, int *status)
 		{
 			exp = expand_argument(node->redirs[i].filename,
 					&env);
+			free(node->args[i]);
 			node->redirs[i].filename = exp;
 			i++;
 		}
@@ -37,6 +39,7 @@ void	expand_node_args(t_node *node, t_env *env, int *status)
 		while (node->args[i])
 		{
 			exp = expand_argument(node->args[i], &env);
+			free(node->args[i]);
 			node->args[i] = exp;
 			i++;
 		}

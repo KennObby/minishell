@@ -11,8 +11,6 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
-#include <stdbool.h>
-#include <stdlib.h>
 
 t_token	create_token(t_type type, char *val)
 {

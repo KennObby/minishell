@@ -11,8 +11,6 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
-#include <stdlib.h>
-#include <string.h>
 
 t_node	*parse_semicolon(t_parser *parser)
 {

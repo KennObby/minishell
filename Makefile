@@ -41,6 +41,9 @@ LDFLAGS = -L $(LIBFT_DIR) -L /usr/local/lib -lreadline -lft
 NAME = minishell
 RM = rm -rf
 
+VALGRIND = valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes
+SUPPRESS_FILE = readline.supp 
+
 all: $(LIBFT) $(NAME)
 
 $(LIBFT):
@@ -49,6 +52,9 @@ $(LIBFT):
 $(NAME): $(OBJS) $(LIBFT)
 		@echo "Compiling $@..."
 		@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) $(LDFLAGS)
+
+val: all
+	$(VALGRIND) --suppressions=$(SUPPRESS_FILE) ./minishell
 
 %.o: %.c
 		@echo "Compiling $@..."

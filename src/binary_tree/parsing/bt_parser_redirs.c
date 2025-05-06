@@ -48,7 +48,7 @@ int	parse_redirects(t_parser *parser, t_node *cmd_node)
 		redir.fd = -1;
 		parser->pos++;
 		if (!add_redirect(parser, cmd_node, redir))
-			return (0);
+			return (free(redir.filename), 0);
 	}
 	return (1);
 }

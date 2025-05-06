@@ -29,7 +29,6 @@ int	execute(t_data *d)
 	if (d->root->type == CMD)
 	{
 		cmd = d->root->args[0];
-		//printf("[EXEC_CMD] Running binary: '%s'\n", d->root->args[0]);
 		if (is_parent_only_builtin(cmd))
 			return (execute_is_parent_only_builtin(d));
 		if (is_forkable_builtin(cmd))

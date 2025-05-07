@@ -109,7 +109,7 @@ void	handle_dollar(const char *s, t_exp *state, t_env **env)
 		if (var_name)
 		{
 			var_value = get_env_value(*env, var_name);
-			state->i += ft_strlen(var_name);
+			state->i += ft_strlen(var_name) - 1;
 			if (var_value)
 				var_part = ft_strdup(var_value);
 			else
@@ -153,8 +153,10 @@ void	append_char(t_exp *state, char c)
 
 	if (c == '\0')
 		return ;
+	if (state->in_single && (c == '*'))
+		c = (char)(~c);
 	tmp[0] = c;
-	tmp[1] = 0;
+	tmp[1] = '\0';
 	joined = ft_strjoin(state->result, tmp);
 	free(state->result);
 	state->result = joined;

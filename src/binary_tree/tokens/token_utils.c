@@ -43,16 +43,3 @@ bool	should_merge(t_token prev, t_token next)
 {
 	return (prev.has_no_space_after && next.type == WORD);
 }
-
-bool	contains_wildcards(const char *word)
-{
-	if (!word)
-		return (false);
-	while (*word)
-	{
-		if (*word == '*')
-			return (true);
-		word++;
-	}
-	return (false);
-}

@@ -27,3 +27,24 @@ bool	match_pattern(const char *str, const char *pattern)
 		return (match_pattern(str + 1, pattern + 1));
 	return (false);
 }
+
+void	restore_masked_wildcards(char **args)
+{
+	int				i;
+	int				j;
+	unsigned char	c;
+
+	i = 0;
+	while (args[i])
+	{
+		j = 0;
+		while (args[i][j])
+		{
+			c = (unsigned char)args[i][j];
+			if ((unsigned char)(~c) == '*')
+				args[i][j] = (char)(~c);
+			j++;
+		}
+		i++;
+	}
+}

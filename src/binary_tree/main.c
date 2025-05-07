@@ -92,9 +92,9 @@ void	inter_mode(t_data *d)
 		}
 		expand_node_args(d->root, d->env_list, &g_data->exit_status);
 		expand_wildcards_node(d->root);
+		restore_masked_wildcards(d->root->args);
 		prepare_heredocs(d->root);
 		g_data->exit_status = execute(d);
-		print_tree(d->root, 0);
 		free_tokens(d->tokens);
 		free_tree(d->root);
 	}
@@ -132,6 +132,8 @@ void	non_inter_mode(t_data *d)
 			continue ;
 		}
 		expand_node_args(d->root, d->env_list, &g_data->exit_status);
+		expand_wildcards_node(d->root);
+		restore_masked_wildcards(d->root->args);
 		prepare_heredocs(d->root);
 		g_data->exit_status = execute(d);
 		free_tokens(d->tokens);

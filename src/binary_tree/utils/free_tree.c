@@ -19,7 +19,6 @@ void	free_tree(t_node *node)
 	i = 0;
 	if (!node)
 		return ;
-	ft_printf("[FREE] Freeing node type: %d\n", node->type);
 	free_tree(node->writer);
 	free_tree(node->reader);
 	if (node->args)

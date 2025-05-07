@@ -38,7 +38,7 @@ t_list	*expand_wildcards(const char *pattern)
 			entry = readdir(dir);
 			continue ;
 		}
-		if (stat(entry->d_name, &sb) != 0 || !(sb.st_mode & S_IFREG))
+		if (stat(entry->d_name, &sb) != 0/*!(sb.st_mode & S_IFREG)*/)
 		{
 			entry = readdir(dir);
 			continue ;
@@ -110,7 +110,7 @@ void	process_single_argument(char *arg, t_list **new_args)
 	t_list	*matches;
 	t_list	*tmp;
 
-	if (contains_wildcards(arg))
+	if (ft_strcmp(arg, "*") == 0)
 	{
 		if (!arg)
 			printf("DEBUG: arg is NULL before expand_wildcards\n");

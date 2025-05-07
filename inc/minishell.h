@@ -243,10 +243,10 @@ int			is_operator(char c);
 bool		has_no_space_after(const char *input, int pos);
 int			is_control_token(t_type type);
 bool		should_merge(t_token prev, t_token next);
-bool		contains_wildcards(const char *word);
 
 //< -------------------------- wildcards_utils.c -------------- >
 bool		match_pattern(const char *str, const char *pattern);
+void		restore_masked_wildcards(char **args);
 
 //< -------------------------- wildcard_mgmt.c ---------------- >
 t_list		*expand_wildcards(const char *pattern);

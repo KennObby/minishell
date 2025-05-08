@@ -36,6 +36,13 @@ int	builtin_unset(t_node *cmd, t_env **env)
 				free(curr);
 				break ;
 			}
+			else
+			{
+				ft_putstr_fd("bash: unset: `", 2);
+				ft_putstr_fd(cmd->args[i], 2);
+				ft_putendl_fd("': not a valid identifier", 2);
+				return (1);
+			}
 			prev = curr;
 			curr = curr->next;
 		}

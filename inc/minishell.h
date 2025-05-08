@@ -329,9 +329,11 @@ void		append_char(t_exp *state, char c);
 //< --------------------------- export_mgmt.c ----------------- >
 int			print_export(t_env *env);
 int			builtin_export(t_data *d);
+bool		is_valid_export_identifier(const char *s);
 
 //< --------------------------- unset_mgmt.c ------------------ >
 int			builtin_unset(t_node *cmd, t_env **env);
+bool		is_valid_unset_identifier(const char *s);
 
 //< --------------------------- exit_mgmt.c ------------------- >
 void		exit_mgmt(t_data *d);

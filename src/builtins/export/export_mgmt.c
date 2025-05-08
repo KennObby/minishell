@@ -34,7 +34,7 @@ int	print_export(t_env *env)
 	return (0);
 }
 
-bool	is_valid_identifier(const char *s)
+bool	is_valid_export_identifier(const char *s)
 {
 	if (!s || (!ft_isalpha(*s) && *s != '_'))
 		return (false);
@@ -74,7 +74,7 @@ int	builtin_export(t_data *d)
 			key = ft_strdup(d->root->args[i]);
 			value = ft_strdup("");
 		}
-		if (!is_valid_identifier(key))
+		if (!is_valid_export_identifier(key))
 		{
 			ft_putendl_fd("not a valid identifier", 2);
 			d->exit_status = 1;

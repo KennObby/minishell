@@ -13,7 +13,6 @@
 #include "../../../inc/minishell.h"
 #include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
 /*
  * In C convention, '\'' represents a single quote (e.g: " ' ")
  * Like, every "valid escapes" character can be isloated this way.

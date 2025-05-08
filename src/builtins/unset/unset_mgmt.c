@@ -11,42 +11,65 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
+#include <stdbool.h>
+
+bool	is_valid_unset_identifier(const char *s)
+{
+	ft_printf("DEBUG validating: ›%s‹ → first char = '%c' (code %d)\n",
+		s, *s, (unsigned char)*s);
+	if (!s || !(ft_isalpha((unsigned char)*s) || *s == '_'))
+		return (false);
+	s++;
+	while (*s)
+	{
+		if (!(ft_isalnum((unsigned char)*s) || *s == '_'))
+			return (false);
+		s++;
+	}
+	return (true);
+}
 
 int	builtin_unset(t_node *cmd, t_env **env)
 {
 	int		i;
+	int		had_error;
 	t_env	*curr;
 	t_env	*prev;
+	char	*key;
 
 	i = 1;
+	had_error = 0;
 	while (cmd->args[i])
 	{
+		key = cmd->args[i++];
+		if (!is_valid_unset_identifier(key))
+		{
+			ft_putstr_fd("bash: unset: `", 2);
+			ft_putstr_fd(key, 2);
+			ft_putendl_fd("': not a valid identifier", 2);
+			had_error = 1;
+			continue ;
+		}
 		prev = NULL;
 		curr = *env;
-		while (curr)
+		while (curr && ft_strcmp(curr->key, key) != 0)
 		{
-			if (ft_strcmp(curr->key, cmd->args[i]) == 0)
-			{
-				if (prev)
-					prev->next = curr->next;
-				else
-					*env = curr->next;
-				free(curr->key);
-				free(curr->value);
-				free(curr);
-				break ;
-			}
-			else
-			{
-				ft_putstr_fd("bash: unset: `", 2);
-				ft_putstr_fd(cmd->args[i], 2);
-				ft_putendl_fd("': not a valid identifier", 2);
-				return (1);
-			}
 			prev = curr;
 			curr = curr->next;
 		}
-		i++;
+		if (curr)
+		{
+			if (prev)
+				prev->next = curr->next;
+			else
+				*env = curr->next;
+			free(curr->key);
+			free(curr->value);
+			free(curr);
+		}
 	}
-	return (0);
+	if (had_error)
+		return (1);
+	else
+		return (0);
 }

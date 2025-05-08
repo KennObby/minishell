@@ -50,7 +50,7 @@ int	execute_cmd(t_data *d)
 		}
 		if (ft_strchr(d->root->args[0], '/'))
 		{
-			if (access(d->root->args[0], X_OK))
+			if (access(d->root->args[0], X_OK) == 0)
 			{
 				reset_signals();
 				execve(d->root->args[0], d->root->args, envp);

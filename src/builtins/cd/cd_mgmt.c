@@ -29,7 +29,7 @@ char	*handle_cd_path(t_data *d)
 	if (count > 2)
 	{
 		ft_putendl_fd("bash: cd : too many arguments", 2);
-		d->exit_status = 1;
+		g_data->exit_status = 1;
 	}
 	if (count == 1)
 	{
@@ -37,7 +37,7 @@ char	*handle_cd_path(t_data *d)
 		if (!path)
 		{
 			ft_putendl_fd("cd: HOME not set\n", 2);
-			d->exit_status = 1;
+			g_data->exit_status = 1;
 		}
 		return (ft_strdup(path));
 	}
@@ -47,7 +47,7 @@ char	*handle_cd_path(t_data *d)
 		if (!path)
 		{
 			ft_printf("cd: OLDPWD not set\n");
-			d->exit_status = 1;
+			g_data->exit_status = 1;
 		}
 		ft_printf("%s\n", path);
 		return (ft_strdup(path));
@@ -58,7 +58,7 @@ char	*handle_cd_path(t_data *d)
 		if (!home)
 		{
 			ft_printf("cd: HOME not set");
-			d->exit_status = 1;
+			g_data->exit_status = 1;
 		}
 		suffix = d->root->args[1] + 1;
 		expanded = ft_strjoin(home, suffix);

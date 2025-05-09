@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
-#include <string.h>
 #include <unistd.h>
 
 t_data	*g_data = NULL;
@@ -21,6 +20,7 @@ void	init_data(t_data *d, char **envp)
 	g_data = d;
 	d->pid = 0;
 	d->env_list = init_env_list(envp);
+	ensure_minimal_env(&d->env_list);
 	d->tokens = NULL;
 	d->root = NULL;
 	d->input = NULL;

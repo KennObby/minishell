@@ -30,14 +30,16 @@ char	*handle_cd_path(t_data *d)
 	{
 		ft_putendl_fd("bash: cd : too many arguments", 2);
 		g_data->exit_status = 1;
+		return (NULL);
 	}
 	if (count == 1)
 	{
 		path = get_env_value(d->env_list, "HOME");
 		if (!path)
 		{
-			ft_putendl_fd("cd: HOME not set\n", 2);
+			ft_putendl_fd("cd: HOME not set", 2);
 			g_data->exit_status = 1;
+			return (NULL);
 		}
 		return (ft_strdup(path));
 	}
@@ -48,6 +50,7 @@ char	*handle_cd_path(t_data *d)
 		{
 			ft_printf("cd: OLDPWD not set\n");
 			g_data->exit_status = 1;
+			return (NULL);
 		}
 		ft_printf("%s\n", path);
 		return (ft_strdup(path));
@@ -59,6 +62,7 @@ char	*handle_cd_path(t_data *d)
 		{
 			ft_printf("cd: HOME not set");
 			g_data->exit_status = 1;
+			return (NULL);
 		}
 		suffix = d->root->args[1] + 1;
 		expanded = ft_strjoin(home, suffix);
@@ -69,31 +73,29 @@ char	*handle_cd_path(t_data *d)
 
 int	builtin_cd(t_data *d)
 {
-	int		status;
 	char	*target;
 	char	*old_pwd;
 	char	cwd[MAX_PATH];
 
 	target = handle_cd_path(d);
-	status = d->exit_status;
 	if (!target)
-		return (status = 1);
+		return (g_data->exit_status = 1);
 	if (chdir(target) == -1)
 	{
 		ft_putendl_fd("No such file or directory", 2);
 		free(target);
-		return (status = 1);
+		return (g_data->exit_status = 1);
 	}
 	old_pwd = get_env_value(d->env_list, "PWD");
 	if (!getcwd(cwd, sizeof(cwd)))
 	{
 		ft_putendl_fd("cd: error retrieving current directory", 2);
 		free(target);
-		return (status = 1);
+		return (g_data->exit_status = 1);
 	}
 	if (old_pwd)
 		update_or_add_env(&d->env_list, "OLDPWD", old_pwd);
 	update_or_add_env(&d->env_list, "PWD", cwd);
 	free(target);
-	return (status = 0);
+	return (g_data->exit_status = 0);
 }

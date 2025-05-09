@@ -110,7 +110,7 @@ void	process_single_argument(char *arg, t_list **new_args)
 	t_list	*matches;
 	t_list	*tmp;
 
-	if (ft_strcmp(arg, "*") == 0)
+	if (ft_strchr(arg, '*') != NULL)
 	{
 		if (!arg)
 			printf("DEBUG: arg is NULL before expand_wildcards\n");

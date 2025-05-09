@@ -12,6 +12,7 @@
 
 #include "../../../inc/minishell.h"
 #include <stdlib.h>
+#include <unistd.h>
 
 t_env	*init_env_list(char **envp)
 {
@@ -77,6 +78,21 @@ t_env	*copy_env(t_env *env)
 		env = env->next;
 	}
 	return (copy);
+}
+
+void	ensure_minimal_env(t_env **env)
+{
+	char	cwd[MAX_PATH];
+
+	if (!get_env_value(*env, "PATH"))
+		update_or_add_env(env, "PATH", "/usr/bin:/bin");
+	if (!get_env_value(*env, "PWD"))
+	{
+		if (getcwd(cwd, sizeof(cwd)))
+			update_or_add_env(env, "PWD", cwd);
+	}
+	if (!get_env_value(*env, "SHLVL"))
+		update_or_add_env(env, "SHLVL", "1");
 }
 
 void	sort_env(t_env *env)

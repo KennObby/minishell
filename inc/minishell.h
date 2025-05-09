@@ -305,6 +305,7 @@ t_env		*init_env_list(char **envp);
 char		**env_list_to_array(t_env *env);
 t_env		*copy_env(t_env *env);
 void		sort_env(t_env *env);
+void		ensure_minimal_env(t_env **env);
 
 //< --------------------------- free_env.c -------------------- >
 void		free_env_list(t_env *env);

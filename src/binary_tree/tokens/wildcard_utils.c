@@ -48,3 +48,57 @@ void	restore_masked_wildcards(char **args)
 		i++;
 	}
 }
+
+void	restore_masked_wildcards_recursive(t_node *node)
+{
+	if (!node)
+		return ;
+	if (node->type == CMD && node->args)
+		restore_masked_wildcards(node->args);
+	restore_masked_wildcards_recursive(node->writer);
+	restore_masked_wildcards_recursive(node->reader);
+}
+
+t_list	*build_list_from_args(char **args)
+{
+	t_list	*lst;
+	int		i;
+
+	lst = NULL;
+	i = 0;
+	while (args && args[i])
+	{
+		ft_lstadd_back(&lst, ft_lstnew(ft_strdup(args[i])));
+		i++;
+	}
+	return (lst);
+}
+
+char	**list_to_args_array(t_list *list)
+{
+	size_t	size;
+	char	**args;
+	t_list	*tmp;
+	int		i;
+
+	size = ft_lstsize(list);
+	if (size == 0)
+	{
+		args = malloc(sizeof(char *) * 2);
+		args[0] = ft_strdup("");
+		args[1] = NULL;
+		return (args);
+	}
+	args = malloc(sizeof(char *) * (size + 1));
+	if (!args)
+		return (NULL);
+	tmp = list;
+	i = 0;
+	while (tmp)
+	{
+		args[i++] = ft_strdup(tmp->content);
+		tmp = tmp->next;
+	}
+	args[i] = NULL;
+	return (args);
+}

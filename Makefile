@@ -78,5 +78,8 @@ val_child: re
 val_fds: re
 	$(VALGRIND) $(FDS) --suppressions=$(SUPPRESS_FILE) ./minishell
 
+val_all: re
+	$(VALGRIND) $(CHILD) $(FDS) --suppressions=$(SUPPRESS_FILE) ./minishell
+
 .PHONY: all clean fclean re
 	

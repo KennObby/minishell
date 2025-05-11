@@ -6,7 +6,7 @@
 /*   By: oilyine- <oleg.ilyine@student42.luxembo    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 21:27:25 by oilyine-          #+#    #+#             */
-/*   Updated: 2025/03/30 22:53:59 by oilyine-         ###   ########.fr       */
+
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ void	remove_newline(char *str)
 	if (len > 0 && str[len - 1] == '\n')
 		str[len - 1] = '\0';
 }
+
 /*
  * ast (root variable) = https://deepsource.com/glossary/ast
  *
@@ -91,8 +92,8 @@ void	inter_mode(t_data *d)
 			continue ;
 		}
 		expand_node_args(d->root, d->env_list, &g_data->exit_status);
-		expand_wildcards_node(d->root);
-		restore_masked_wildcards(d->root->args);
+		expand_wildcards_recursive(d->root);
+		restore_masked_wildcards_recursive(d->root);
 		prepare_heredocs(d->root);
 		g_data->exit_status = execute(d);
 		free_tokens(d->tokens);
@@ -132,8 +133,8 @@ void	non_inter_mode(t_data *d)
 			continue ;
 		}
 		expand_node_args(d->root, d->env_list, &g_data->exit_status);
-		expand_wildcards_node(d->root);
-		restore_masked_wildcards(d->root->args);
+		expand_wildcards_recursive(d->root);
+		restore_masked_wildcards_recursive(d->root);
 		prepare_heredocs(d->root);
 		g_data->exit_status = execute(d);
 		free_tokens(d->tokens);

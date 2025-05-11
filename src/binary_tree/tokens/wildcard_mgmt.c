@@ -11,13 +11,6 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
-#include <dirent.h>
-#include <linux/limits.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
 
 t_list	*expand_wildcards(const char *pattern)
 {
@@ -38,7 +31,7 @@ t_list	*expand_wildcards(const char *pattern)
 			entry = readdir(dir);
 			continue ;
 		}
-		if (stat(entry->d_name, &sb) != 0/*!(sb.st_mode & S_IFREG)*/)
+		if (stat(entry->d_name, &sb) != 0)
 		{
 			entry = readdir(dir);
 			continue ;
@@ -53,56 +46,6 @@ t_list	*expand_wildcards(const char *pattern)
 	}
 	closedir(dir);
 	return (matches);
-}
-
-/*
- * The objective here is to:
- * 1. converting every args to a list with built_list
- * 2. Now that we have those, we can build a new char ** from that converted list
- *
- */
-t_list	*build_list_from_args(char **args)
-{
-	t_list	*lst;
-	int		i;
-
-	lst = NULL;
-	i = 0;
-	while (args && args[i])
-	{
-		ft_lstadd_back(&lst, ft_lstnew(ft_strdup(args[i])));
-		i++;
-	}
-	return (lst);
-}
-
-char	**list_to_args_array(t_list *list)
-{
-	size_t	size;
-	char	**args;
-	t_list	*tmp;
-	int		i;
-
-	size = ft_lstsize(list);
-	if (size == 0)
-	{
-		args = malloc(sizeof(char *) * 2);
-		args[0] = ft_strdup("");
-		args[1] = NULL;
-		return (args);
-	}
-	args = malloc(sizeof(char *) * (size + 1));
-	if (!args)
-		return (NULL);
-	tmp = list;
-	i = 0;
-	while (tmp)
-	{
-		args[i++] = ft_strdup(tmp->content);
-		tmp = tmp->next;
-	}
-	args[i] = NULL;
-	return (args);
 }
 
 void	process_single_argument(char *arg, t_list **new_args)
@@ -156,4 +99,14 @@ void	expand_wildcards_node(t_node *node)
 	free_args(node->args);
 	node->args = list_to_args_array(new_args);
 	ft_lstclear(&new_args, free);
+}
+
+void	expand_wildcards_recursive(t_node *node)
+{
+	if (!node)
+		return ;
+	if (node->type == CMD)
+		expand_wildcards_node(node);
+	expand_wildcards_recursive(node->writer);
+	expand_wildcards_recursive(node->reader);
 }

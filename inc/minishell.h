@@ -247,13 +247,15 @@ bool		should_merge(t_token prev, t_token next);
 //< -------------------------- wildcards_utils.c -------------- >
 bool		match_pattern(const char *str, const char *pattern);
 void		restore_masked_wildcards(char **args);
+void		restore_masked_wildcards_recursive(t_node *node);
+t_list		*build_list_from_args(char **args);
+char		**list_to_args_array(t_list *list);
 
 //< -------------------------- wildcard_mgmt.c ---------------- >
 t_list		*expand_wildcards(const char *pattern);
-t_list		*build_list_from_args(char **args);
-char		**list_to_args_array(t_list *list);
 void		process_single_argument(char *arg, t_list **new_args);
 void		expand_wildcards_node(t_node *node);
+void		expand_wildcards_recursive(t_node *node);
 
 //< --------------------------- free_tree.c ------------------- >
 void		free_tree(t_node *node);

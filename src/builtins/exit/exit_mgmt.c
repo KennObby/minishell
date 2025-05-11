@@ -19,18 +19,17 @@ int	builtin_exit(t_data *d)
 {
 	ft_putendl_fd("exit", 1);
 	exit_mgmt(d);
-	return (0);
+	return (d->exit_status);
 }
 
 void	exit_mgmt(t_data *d)
 {
-	int		status;
-	char	*arg;
-	int		i;
-	bool	has_digit;
+	char		*arg;
+	int			i;
+	bool		has_digit;
+	long long	value;
 
 	arg = d->root->args[1];
-	status = d->exit_status;
 	if (arg)
 	{
 		i = 0;
@@ -57,9 +56,10 @@ void	exit_mgmt(t_data *d)
 		{
 			ft_putendl_fd("minishell: exit: too many arguments", 2);
 			d->exit_status = 1;
-			exit(2);
+			return ;
 		}
-		status = ft_atoi(arg);
+		value = ft_atoll(arg);
+		d->exit_status = (int)value;
 	}
-	exit((unsigned char)status);
+	exit((unsigned char)d->exit_status);
 }

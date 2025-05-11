@@ -32,6 +32,7 @@ int				ft_strncmp(const char *src, const char *dest, size_t length);
 int				ft_toupper(int c);
 int				ft_tolower(int c);
 int				ft_atoi(const char *str);
+long long		ft_atoll(const char *str);
 uint32_t		ft_atoi_base(const char *str, int base);
 int				ft_memcmp(const void *dest, const void *src, size_t n);
 

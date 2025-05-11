@@ -34,5 +34,7 @@ void	*ft_realloc(void *ptr, size_t old_size, size_t new_size)
 		ft_memcpy(new_ptr, ptr, copy_size);
 		free(ptr);
 	}
+	if (new_size > old_size)
+		ft_bzero((char *)new_ptr + old_size, new_size - old_size);
 	return (new_ptr);
 }

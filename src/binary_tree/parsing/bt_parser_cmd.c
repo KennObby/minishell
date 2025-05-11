@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -99,11 +100,14 @@ char	**collect_args(t_parser *parser, t_node *cmd_node, int *arg_count)
 int	finalize_args(t_node *cmd, char **args, int arg_count)
 {
 	char	**new_args;
+	size_t	old_size;
+	size_t	new_size;
 
 	if (!args && cmd->redir_count == 0)
 		return (free_args(args), 0);
-	new_args = ft_realloc(args, arg_count * sizeof(char *),
-			(arg_count + 1) * sizeof(char *));
+	old_size = arg_count * sizeof(char *);
+	new_size = (arg_count + 1) * sizeof(char *) + sizeof(char *);
+	new_args = ft_realloc(args, old_size, new_size);
 	if (!new_args)
 		return (free_args(args), 0);
 	new_args[arg_count] = NULL;

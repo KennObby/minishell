@@ -43,6 +43,8 @@ RM = rm -rf
 
 VALGRIND = valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes
 SUPPRESS_FILE = readline.supp 
+CHILD = --trace-children=yes
+FDS = --track-fds=yes
 
 all: $(LIBFT) $(NAME)
 
@@ -69,6 +71,12 @@ re: fclean all
 
 val: re
 	$(VALGRIND) --suppressions=$(SUPPRESS_FILE) ./minishell
+
+val_child: re
+	$(VALGRIND) $(CHILD) --suppressions=$(SUPPRESS_FILE) ./minishell
+
+val_fds: re
+	$(VALGRIND) $(FDS) --suppressions=$(SUPPRESS_FILE) ./minishell
 
 .PHONY: all clean fclean re
 	

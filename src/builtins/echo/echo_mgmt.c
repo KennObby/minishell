@@ -82,7 +82,10 @@ char	*expand_argument(const char *s, t_env **env)
 				handle_quote(s[state.i], &state);
 		}
 		else if (s[state.i] == '$' && !state.in_single)
+		{
 			handle_dollar(s, &state, env);
+			continue ;
+		}
 		else
 			append_char(&state, s[state.i]);
 		state.i++;
@@ -97,11 +100,22 @@ void	handle_dollar(const char *s, t_exp *state, t_env **env)
 	char	*var_value;
 
 	state->i++;
+	if (!s[state->i])
+	{
+		var_part = ft_strdup("$");
+		state->result = ft_strjoin_free(state->result, var_part);
+		free(var_part);
+		return ;
+	}
 	var_name = NULL;
 	var_value = NULL;
 	var_part = NULL;
 	if (s[state->i] == '?')
+	{
 		var_part = ft_itoa(g_data->exit_status);
+		state->i++;
+		return ;
+	}
 	else if (ft_isalpha(s[state->i]) || s[state->i] == '_')
 	{
 		var_name = extract_var_name(s + state->i);

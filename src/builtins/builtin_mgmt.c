@@ -41,7 +41,7 @@ int	builtin_echo(t_node *cmd, t_env **env)
 	while (cmd->args[i])
 	{
 		ft_printf("%s", cmd->args[i]);
-		if (cmd->args[i + 1])
+		if (cmd->args[i + 1] != NULL)
 			ft_printf(" ");
 		i++;
 	}

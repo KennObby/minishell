@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
+#include <stdbool.h>
 
 t_token	create_token(t_type type, char *val)
 {
@@ -19,6 +20,7 @@ t_token	create_token(t_type type, char *val)
 	token.type = type;
 	token.value = val;
 	token.has_no_space_after = false;
+	token.quoted = false;
 	return (token);
 }
 
@@ -53,6 +55,9 @@ int	tokenize_word(char *input, t_token *tokens, int i, int *pos)
 	len = &input[*pos] - start;
 	tokens[i] = create_token(WORD, ft_substr(start, 0, len));
 	tokens[i].has_no_space_after = has_no_space_after(input, *pos);
+	if ((start[0] == '\'' && start[len - 1] == '\'')
+		|| (start[0] == '"' && start[len - 1] == '"'))
+		tokens[i].quoted = true;
 	return (i + 1);
 }
 /*
@@ -90,7 +95,7 @@ t_token	*tokenize(char *input)
 		else
 			i = tokenize_word(input, tokens, i, &pos);
 	}
-	tokens[i] = (t_token){END, NULL, false};
+	tokens[i] = (t_token){END, NULL, false, false};
 	tokens[i + 1] = (t_token){0};
 	return (tokens);
 }

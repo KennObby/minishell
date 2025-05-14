@@ -36,7 +36,7 @@ int	parse_redirects(t_parser *parser, t_node *cmd_node)
 
 	while (is_redirection(peek(parser)))
 	{
-		redir.type = parser->tokens[parser->pos].type;
+		redir.type = parser->tokens[parser->pos - 1].type;
 		parser->pos++;
 		if (parser->pos >= MAX_TOKENS || peek(parser) != WORD)
 		{
@@ -46,6 +46,7 @@ int	parse_redirects(t_parser *parser, t_node *cmd_node)
 		}
 		redir.filename = ft_strdup(parser->tokens[parser->pos].value);
 		redir.fd = -1;
+		redir.is_quoted = parser->tokens[parser->pos].quoted;
 		parser->pos++;
 		if (!add_redirect(parser, cmd_node, redir))
 			return (free(redir.filename), 0);

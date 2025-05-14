@@ -83,6 +83,7 @@ typedef struct s_redir
 {
 	t_type	type;
 	char	*filename;
+	bool	is_quoted;
 	int		fd;
 }				t_redir;
 
@@ -109,6 +110,7 @@ typedef struct s_token
 	t_type	type;
 	char	*value;
 	bool	has_no_space_after;
+	bool	quoted;
 }				t_token;
 
 /*
@@ -285,14 +287,14 @@ int			handle_redirections(t_node *cmd);
 
 //< --------------------------- exec_mgmt.c ------------------- >
 int			execute(t_data *d);
-void		prepare_heredocs(t_node *node);
-int			handle_heredoc(char *delimiter);
+void		prepare_heredocs(t_node *node, t_env *env_list);
+int			handle_heredoc(char *delimiter, bool is_quoted, t_env *env_list);
 
 //< --------------------------- exec_utils.c ------------------ >
 int			execute_subshell(t_data *d);
 int			execute_is_parent_only_builtin(t_data *d);
 int			execute_forked_builtin(t_data *d);
-
+char		*expand_heredoc_line(char *line, t_env *env);
 //< --------------------------- signal_handlers.c ------------- >
 void		sigint_handler(int sig);
 void		heredoc_sig_handler(int sig);

@@ -48,7 +48,7 @@ int	execute(t_data *d)
 	return (0);
 }
 
-void	prepare_heredocs(t_node *node)
+void	prepare_heredocs(t_node *node, t_env *env_list)
 {
 	int	i;
 
@@ -60,17 +60,21 @@ void	prepare_heredocs(t_node *node)
 		while (i < node->redir_count)
 		{
 			if (node->redirs[i].type == HEREDOC)
-				node->redirs[i].fd = handle_heredoc(node->redirs[i].filename);
+				node->redirs[i].fd = handle_heredoc(
+						node->redirs[i].filename,
+						node->redirs[i].is_quoted,
+						env_list);
 			i++;
 		}
 	}
-	prepare_heredocs(node->writer);
-	prepare_heredocs(node->reader);
+	prepare_heredocs(node->writer, env_list);
+	prepare_heredocs(node->reader, env_list);
 }
 
-int	handle_heredoc(char *delimiter)
+int	handle_heredoc(char *delimiter, bool is_quoted, t_env *env_list)
 {
 	char	*line;
+	char	*expanded;
 	int		pipefd[2];
 	int		status;
 	pid_t	pid;
@@ -95,8 +99,18 @@ int	handle_heredoc(char *delimiter)
 			line = readline(">");
 			if (!line || ft_strcmp(line, delimiter) == 0)
 				break ;
-			write(pipefd[1], line, ft_strlen(line));
-			write(pipefd[1], "\n", 1);
+			if (!is_quoted)
+			{
+				expanded = expand_heredoc_line(line, env_list);
+				write(pipefd[1], expanded, ft_strlen(expanded));
+				write(pipefd[1], "\n", 1);
+				free(expanded);
+			}
+			else
+			{
+				write(pipefd[1], line, ft_strlen(line));
+				write(pipefd[1], "\n", 1);
+			}
 			free(line);
 		}
 		free(line);

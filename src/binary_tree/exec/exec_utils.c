@@ -83,3 +83,8 @@ int	execute_forked_builtin(t_data *d)
 		return (128 + WTERMSIG(status));
 	return (1);
 }
+
+char	*expand_heredoc_line(char *line, t_env *env)
+{
+	return (expand_argument(line, &env));
+}

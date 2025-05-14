@@ -94,7 +94,7 @@ void	inter_mode(t_data *d)
 		expand_all_node_args(d->root, d->env_list);
 		expand_wildcards_recursive(d->root);
 		restore_masked_wildcards_recursive(d->root);
-		prepare_heredocs(d->root);
+		prepare_heredocs(d->root, d->env_list);
 		g_data->exit_status = execute(d);
 		free_tokens(d->tokens);
 		free_tree(d->root);
@@ -135,7 +135,7 @@ void	non_inter_mode(t_data *d)
 		expand_all_node_args(d->root, d->env_list);
 		expand_wildcards_recursive(d->root);
 		restore_masked_wildcards_recursive(d->root);
-		prepare_heredocs(d->root);
+		prepare_heredocs(d->root, d->env_list);
 		g_data->exit_status = execute(d);
 		free_tokens(d->tokens);
 		free_tree(d->root);

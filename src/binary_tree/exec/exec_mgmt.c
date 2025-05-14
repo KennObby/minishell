@@ -28,13 +28,17 @@ int	execute(t_data *d)
 	}
 	if (d->root->type == CMD)
 	{
-		cmd = d->root->args[0];
-		if (is_parent_only_builtin(cmd))
+		cmd = NULL;
+		if (d->root->args && d->root->args[0])
+			cmd = d->root->args[0];
+		if (cmd && is_parent_only_builtin(cmd))
 			return (execute_is_parent_only_builtin(d));
-		if (is_forkable_builtin(cmd))
+		if (cmd && is_forkable_builtin(cmd))
 			return (execute_forked_builtin(d));
 		return (execute_cmd(d));
 	}
+	if (d->root->type == SUBSHELL)
+		return (execute_subshell(d));
 	if (d->root->type == PIPE)
 		return (execute_pipe(d));
 	if (d->root->type == SEMICOLON)
@@ -42,45 +46,6 @@ int	execute(t_data *d)
 	if (d->root->type == LOGICAL_AND || d->root->type == LOGICAL_OR)
 		return (execute_logical(d));
 	return (0);
-}
-
-int	execute_is_parent_only_builtin(t_data *d)
-{
-	if (handle_redirections(d->root) != 0)
-	{
-		dup2(d->stdin_backup, STDIN_FILENO);
-		dup2(d->stdout_backup, STDOUT_FILENO);
-		return (1);
-	}
-	g_data->exit_status = exec_builtin(d);
-	dup2(d->stdin_backup, STDIN_FILENO);
-	dup2(d->stdout_backup, STDOUT_FILENO);
-	return (g_data->exit_status);
-}
-
-int	execute_forked_builtin(t_data *d)
-{
-	pid_t	pid;
-	int		status;
-
-	pid = fork();
-	if (pid < 0)
-	{
-		perror("minishell");
-		return (1);
-	}
-	if (pid == 0)
-	{
-		if (handle_redirections(d->root) != 0)
-			exit(1);
-		exit(exec_builtin(d));
-	}
-	waitpid(pid, &status, 0);
-	if (WIFEXITED(status))
-		return (WEXITSTATUS(status));
-	else if (WIFSIGNALED(status))
-		return (128 + WTERMSIG(status));
-	return (1);
 }
 
 void	prepare_heredocs(t_node *node)

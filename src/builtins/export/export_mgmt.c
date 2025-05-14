@@ -76,7 +76,7 @@ int	builtin_export(t_data *d)
 		}
 		if (!is_valid_export_identifier(key))
 		{
-			ft_putendl_fd("not a valid identifier", 2);
+			ft_putendl_fd("bash: export: `': not a valid identifier", 2);
 			d->exit_status = 1;
 		}
 		else

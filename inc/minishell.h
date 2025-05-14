@@ -68,6 +68,7 @@ typedef enum e_type
 	GROUPING,
 	GROUPING_OPEN,
 	GROUPING_CLOSE,
+	SUBSHELL,
 	WILDCARD,
 	END,
 	NB_TYPES,
@@ -224,14 +225,15 @@ t_node		*parse_command(t_parser *parser);
 
 //< --------------------------- bt_parser.c ------------------- >
 t_node		*parse_semicolon(t_parser *parser);
-t_node		*parse_logical(t_parser *parser);
+t_node		*parse_logical_or(t_parser *parser);
+t_node		*parse_logical_and(t_parser *parser);
 t_node		*parse_pipeline(t_parser *parser);
 t_node		*parse_grouping(t_parser *parser);
 t_node		*parse(t_parser *parser);
 
 //< --------------------------- bt_parser_args.c -------------- >
-void		expand_node_args(t_node *node, t_env *env, int *status);
-
+void		expand_node_args(t_node *node, t_env *env);
+void		expand_all_node_args(t_node *node, t_env *env);
 //< --------------------------- token.c ----------------------- >
 t_token		create_token(t_type type, char *val);
 int			tokenize_word(char *input, t_token *tokens, int i, int *pos);
@@ -283,10 +285,13 @@ int			handle_redirections(t_node *cmd);
 
 //< --------------------------- exec_mgmt.c ------------------- >
 int			execute(t_data *d);
-int			execute_forked_builtin(t_data *d);
-int			execute_is_parent_only_builtin(t_data *d);
 void		prepare_heredocs(t_node *node);
 int			handle_heredoc(char *delimiter);
+
+//< --------------------------- exec_utils.c ------------------ >
+int			execute_subshell(t_data *d);
+int			execute_is_parent_only_builtin(t_data *d);
+int			execute_forked_builtin(t_data *d);
 
 //< --------------------------- signal_handlers.c ------------- >
 void		sigint_handler(int sig);
@@ -344,6 +349,7 @@ int			builtin_exit(t_data *d);
 
 //< --------------------------- builtin_utils.c --------------- >
 int			is_builtin(char *cmd);
+bool		is_all_n_flag(const char *s);
 
 //< --------------------------- builltin_mgmt.c --------------- >
 int			builtin_env(t_env *env);

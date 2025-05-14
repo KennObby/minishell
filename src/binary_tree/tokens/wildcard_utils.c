@@ -84,8 +84,9 @@ char	**list_to_args_array(t_list *list)
 	size = ft_lstsize(list);
 	if (size == 0)
 	{
-		args = malloc(sizeof(char *) * 2);
-		args[0] = ft_strdup("");
+		args = malloc(sizeof(char *) * 1);
+		if (!args)
+			return (NULL);
 		args[1] = NULL;
 		return (args);
 	}

@@ -29,15 +29,15 @@ int	builtin_echo(t_node *cmd, t_env **env)
 	int		no_newline;
 
 	(void)env;
-	i = 1;
 	no_newline = 0;
-	if (cmd->args[1] && ft_strcmp(cmd->args[1], "-n") == 0)
+	if (!cmd->args || !cmd->args[0])
+		return (0);
+	i = 1;
+	while (cmd->args[i] && is_all_n_flag(cmd->args[i]))
 	{
 		no_newline = 1;
 		i++;
 	}
-	if (cmd->args[2] && ft_strcmp(cmd->args[2], "-n") == 0)
-		i++;
 	while (cmd->args[i])
 	{
 		ft_printf("%s", cmd->args[i]);

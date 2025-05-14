@@ -113,6 +113,8 @@ void	handle_dollar(const char *s, t_exp *state, t_env **env)
 	if (s[state->i] == '?')
 	{
 		var_part = ft_itoa(g_data->exit_status);
+		state->result = ft_strjoin_free(state->result, var_part);
+		free(var_part);
 		state->i++;
 		return ;
 	}
@@ -122,7 +124,7 @@ void	handle_dollar(const char *s, t_exp *state, t_env **env)
 		if (var_name)
 		{
 			var_value = get_env_value(*env, var_name);
-			state->i += ft_strlen(var_name) - 1;
+			state->i += ft_strlen(var_name);
 			if (var_value)
 				var_part = ft_strdup(var_value);
 			else

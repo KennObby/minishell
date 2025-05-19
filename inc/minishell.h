@@ -31,6 +31,7 @@
 # include <termios.h>
 # include <errno.h>
 # include <dirent.h>
+# include <fcntl.h>
 # include "../Libft/libft.h"
 # include "../Libft/ft_printf.h"
 # include "../Libft/get_next_line_bonus.h"
@@ -198,6 +199,7 @@ void		debug_print_tree(t_node *node, int indent);
 //< --------------------------- init_tree.c ------------------- >
 t_node		*create_leaf(char **args);
 t_node		*create_node(t_type type, t_node *left, t_node *right);
+t_node		*create_empty_node(void);
 
 //< --------------------------- init_data.c ------------------- >
 void		init_data(t_data *data, char **envp);
@@ -216,7 +218,7 @@ void		*handle_syntax_error(t_parser *parser);
 
 //< --------------------------- bt_parser_redirs.c ------------ >
 int			add_redirect(t_parser *parser, t_node *cmd_node, t_redir redir);
-int			parse_redirects(t_parser *parser, t_node *cmd_node);
+int			parse_redirects(t_parser *parser, t_node **cmd_node);
 
 //< -------------------------- bt_parser_cmd.c ---------------- >
 int			parse_single_redirect(t_parser *parser, t_node *cmd_node);
@@ -295,6 +297,8 @@ int			execute_subshell(t_data *d);
 int			execute_is_parent_only_builtin(t_data *d);
 int			execute_forked_builtin(t_data *d);
 char		*expand_heredoc_line(char *line, t_env *env);
+void		cleanup_heredoc_fds(t_node *node);
+
 //< --------------------------- signal_handlers.c ------------- >
 void		sigint_handler(int sig);
 void		heredoc_sig_handler(int sig);

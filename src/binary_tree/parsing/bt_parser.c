@@ -137,7 +137,7 @@ t_node	*parse_grouping(t_parser *parser)
 		wrapper = create_node(SUBSHELL, subtree, NULL);
 		if (!wrapper)
 			return (free_tree(subtree), NULL);
-		if (!parse_redirects(parser, wrapper))
+		if (!parse_redirects(parser, &wrapper))
 			return (free_tree(wrapper), NULL);
 		return (wrapper);
 	}

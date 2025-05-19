@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 int	execute_subshell(t_data *d)
 {
@@ -37,6 +38,7 @@ int	execute_subshell(t_data *d)
 		exit(execute(d));
 	}
 	waitpid(pid, &status, 0);
+	cleanup_heredoc_fds(d->root);
 	d->root = saved;
 	if (WIFEXITED(status))
 		return (WEXITSTATUS(status));
@@ -51,9 +53,11 @@ int	execute_is_parent_only_builtin(t_data *d)
 	{
 		dup2(d->stdin_backup, STDIN_FILENO);
 		dup2(d->stdout_backup, STDOUT_FILENO);
+		cleanup_heredoc_fds(d->root);
 		return (1);
 	}
 	g_data->exit_status = exec_builtin(d);
+	cleanup_heredoc_fds(d->root);
 	dup2(d->stdin_backup, STDIN_FILENO);
 	dup2(d->stdout_backup, STDOUT_FILENO);
 	return (g_data->exit_status);
@@ -87,4 +91,27 @@ int	execute_forked_builtin(t_data *d)
 char	*expand_heredoc_line(char *line, t_env *env)
 {
 	return (expand_argument(line, &env));
+}
+
+void	cleanup_heredoc_fds(t_node *node)
+{
+	int	i;
+
+	if (!node)
+		return ;
+	if (node->type == CMD)
+	{
+		i = 0;
+		while (i < node->redir_count)
+		{
+			if (node->redirs[i].type == HEREDOC && node->redirs[i].fd != -1)
+			{
+				close(node->redirs[i].fd);
+				node->redirs[i].fd = -1;
+			}
+			i++;
+		}
+	}
+	cleanup_heredoc_fds(node->writer);
+	cleanup_heredoc_fds(node->reader);
 }

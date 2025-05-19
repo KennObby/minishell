@@ -58,6 +58,8 @@ int	tokenize_word(char *input, t_token *tokens, int i, int *pos)
 	if ((start[0] == '\'' && start[len - 1] == '\'')
 		|| (start[0] == '"' && start[len - 1] == '"'))
 		tokens[i].quoted = true;
+	printf("[TOKENIZER] Heredoc delimiter token: '%s' (quoted: %d)\n",
+		tokens[i].value, tokens[i].quoted);
 	return (i + 1);
 }
 /*

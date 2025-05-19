@@ -11,8 +11,6 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
-#include <stdbool.h>
-#include <stdlib.h>
 /*
  * In C convention, '\'' represents a single quote (e.g: " ' ")
  * Like, every "valid escapes" character can be isloated this way.
@@ -98,33 +96,45 @@ void	handle_dollar(const char *s, t_exp *state, t_env **env)
 	char	*var_part;
 	char	*var_name;
 	char	*var_value;
+	int		var_start;
+	char	quote;
 
-	state->i++;
-	if (!s[state->i])
-	{
-		var_part = ft_strdup("$");
-		state->result = ft_strjoin_free(state->result, var_part);
-		free(var_part);
-		return ;
-	}
 	var_name = NULL;
 	var_value = NULL;
 	var_part = NULL;
-	if (s[state->i] == '?')
+	state->i++;
+	if (!s[state->i])
+		var_part = ft_strdup("$");
+	else if (s[state->i] == '?')
 	{
 		var_part = ft_itoa(g_data->exit_status);
-		state->result = ft_strjoin_free(state->result, var_part);
-		free(var_part);
 		state->i++;
-		return ;
+	}
+	else if (s[state->i] == '$')
+	{
+		var_part = ft_strdup("$");
+		state->i++;
+	}
+	else if (s[state->i] == '"' || s[state->i] == '\'')
+	{
+		quote = s[state->i];
+		state->i++;
+		var_start = state->i;
+		while (s[state->i] && s[state->i] != quote)
+			state->i++;
+		var_part = ft_substr(s, var_start, state->i - var_start);
+		if (s[state->i] == quote)
+			state->i++;
 	}
 	else if (ft_isalpha(s[state->i]) || s[state->i] == '_')
 	{
-		var_name = extract_var_name(s + state->i);
+		var_start = state->i;
+		while (ft_isalnum(s[state->i]) || s[state->i] == '_')
+			state->i++;
+		var_name = ft_substr(s, var_start, state->i - var_start);
 		if (var_name)
 		{
 			var_value = get_env_value(*env, var_name);
-			state->i += ft_strlen(var_name);
 			if (var_value)
 				var_part = ft_strdup(var_value);
 			else

@@ -42,9 +42,9 @@ LDFLAGS = -L $(LIBFT_DIR) -L /usr/local/lib -lreadline -lft
 
 NAME = minishell
 RM = rm -rf
-
+PWD := $(shell pwd)
 VALGRIND = valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes
-SUPPRESS_FILE = readline.supp 
+SUPPRESS_FILE = $(PWD)/valgrind/readline.supp 
 CHILD = --trace-children=yes
 FDS = --track-fds=yes
 

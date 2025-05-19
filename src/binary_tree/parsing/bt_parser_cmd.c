@@ -6,7 +6,7 @@
 /*   By: oilyine- <oleg.ilyine@student42.luxembour  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 16:43:10 by oilyine-          #+#    #+#             */
-/*   Updated: 2025/04/16 18:14:26 by oilyine-         ###   ########.fr       */
+/*   Updated: 2025/05/15 18:42:37 by oilyine-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ int	parse_single_redirect(t_parser *parser, t_node *cmd_node)
 	char	*redir_filename;
 	t_redir	redir;
 
+	ft_bzero(&redir, sizeof(t_redir));
 	redir_type = parser->tokens[parser->pos].type;
 	parser->pos++;
 	if (peek(parser) != WORD)
@@ -87,11 +88,13 @@ char	**collect_args(t_parser *parser, t_node *cmd_node, int *arg_count)
 		if (!arg)
 			return (free(arg), free_args(args), NULL);
 		new_args = ft_realloc(args, n * sizeof * args,
-				(n + 1) * sizeof * args);
+				(n + 2) * sizeof * args);
 		if (!new_args)
 			return (free(arg), free_args(args), NULL);
 		args = new_args;
-		args[n++] = arg;
+		args[n] = arg;
+		args[n + 1] = NULL;
+		n++;
 	}
 	*arg_count = n;
 	return (args);
@@ -121,9 +124,17 @@ t_node	*parse_command(t_parser *parser)
 	int		arg_count;
 	t_node	*cmd_node;
 
-	if (peek(parser) != WORD && !is_redirection(peek(parser)))
-		return (handle_syntax_error(parser));
-	cmd_node = create_leaf(NULL);
+	cmd_node = NULL;
+	if (!parse_redirects(parser, &cmd_node))
+		return (free_tree(cmd_node), NULL);
+	if (peek(parser) != WORD)
+	{
+		if (cmd_node && cmd_node->redir_count > 0)
+			return (cmd_node);
+		return (free_tree(cmd_node), handle_syntax_error(parser));
+	}
+	if (!cmd_node)
+		cmd_node = create_leaf(NULL);
 	if (!cmd_node)
 		return (NULL);
 	args = collect_args(parser, cmd_node, &arg_count);
@@ -132,9 +143,6 @@ t_node	*parse_command(t_parser *parser)
 	if (!finalize_args(cmd_node, args, arg_count))
 		return (NULL);
 	if (arg_count == 0 && cmd_node->redir_count == 0)
-	{
-		free_tree(cmd_node);
-		return (handle_syntax_error(parser));
-	}
+		return (free_tree(cmd_node), handle_syntax_error(parser));
 	return (cmd_node);
 }

@@ -6,19 +6,10 @@
 /*   By: oilyine- <oleg.ilyine@student42.luxembo    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/28 21:27:25 by oilyine-          #+#    #+#             */
-
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
-#include <readline/history.h>
-#include <readline/readline.h>
-#include <signal.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
 char	*built_prompt(t_env *env)
 {
@@ -157,7 +148,9 @@ int	main(int ac, char **av, char **envp)
 		inter_mode(&data);
 	free_env_list(data.env_list);
 	rl_clear_history();
-	close(data.stdin_backup);
-	close(data.stdout_backup);
+	if (data.stdin_backup >= 0)
+		close(data.stdin_backup);
+	if (data.stdout_backup >= 0)
+		close(data.stdout_backup);
 	return (data.exit_status);
 }

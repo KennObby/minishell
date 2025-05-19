@@ -28,6 +28,8 @@ int	execute(t_data *d)
 	}
 	if (d->root->type == CMD)
 	{
+		if (!d->root->args || !d->root->args[0] || d->root->redir_count > 0)
+			return (execute_cmd(d));
 		cmd = NULL;
 		if (d->root->args && d->root->args[0])
 			cmd = d->root->args[0];
@@ -114,6 +116,7 @@ int	handle_heredoc(char *delimiter, bool is_quoted, t_env *env_list)
 			free(line);
 		}
 		free(line);
+		close(pipefd[0]);
 		close(pipefd[1]);
 		exit(0);
 	}

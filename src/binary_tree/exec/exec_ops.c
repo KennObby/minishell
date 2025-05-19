@@ -11,20 +11,17 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
-#include <fcntl.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <unistd.h>
 /* DOCS : https://sites.uclouvain.be/SystInfo/usr/include/bits/waitstatus.h.html
  */
 int	execute_cmd(t_data *d)
 {
-	pid_t	pid;
-	char	**envp;
-	char	*path;
-	int		redir_status;
-	int		status;
+	pid_t		pid;
+	char		**envp;
+	char		*path;
+	int			redir_status;
+	int			status;
+	struct stat	st;
 
 	pid = fork();
 	if (pid < 0)
@@ -34,6 +31,24 @@ int	execute_cmd(t_data *d)
 	}
 	if (pid == 0)
 	{
+		if (!d->root->args || !d->root->args[0])
+		{
+			if (d->root->redir_count > 0)
+			{
+				redir_status = handle_redirections(d->root);
+				if (redir_status != 0)
+				{
+					dup2(d->stdin_backup, STDIN_FILENO);
+					dup2(d->stdout_backup, STDOUT_FILENO);
+					g_data->exit_status = redir_status;
+					exit(redir_status);
+				}
+				g_data->exit_status = 0;
+				exit(0);
+			}
+			ft_putstr_fd("minishell: invalid command\n", 2);
+			exit(127);
+		}
 		redir_status = handle_redirections(d->root);
 		if (redir_status != 0)
 		{
@@ -43,32 +58,41 @@ int	execute_cmd(t_data *d)
 			exit(redir_status);
 		}
 		envp = env_list_to_array(d->env_list);
-		if (!d->root->args || !d->root->args[0])
-		{
-			ft_putstr_fd("minishell: invalid command\n", 2);
-			exit(127);
-		}
 		if (ft_strchr(d->root->args[0], '/'))
 		{
+			if (stat(d->root->args[0], &st) == 0 && S_ISDIR(st.st_mode))
+			{
+				ft_putstr_fd("minishell: ", 2);
+				ft_putstr_fd(d->root->args[0], 2);
+				ft_putendl_fd(": Is a directory", 2);
+				free_str_array(envp);
+				exit(126);
+			}
 			if (access(d->root->args[0], X_OK) == 0)
 			{
 				reset_signals();
 				execve(d->root->args[0], d->root->args, envp);
 			}
 			perror(d->root->args[0]);
+			free_str_array(envp);
 			exit(126);
 		}
 		path = resolve_path(d->root->args[0], d->env_list);
 		if (!path)
 		{
 			ft_putstr_fd("minishell: command not found\n", 2);
+			free_str_array(envp);
 			exit(127);
 		}
 		reset_signals();
 		execve(path, d->root->args, envp);
+		perror(path);
+		free(path);
+		free_str_array(envp);
 		exit(126);
 	}
 	waitpid(pid, &status, 0);
+	cleanup_heredoc_fds(d->root);
 	if (WIFEXITED(status))
 		g_data->exit_status = WEXITSTATUS(status);
 	else if (WIFSIGNALED(status))
@@ -121,7 +145,9 @@ int	execute_pipe(t_data *d)
 	close(fd[0]);
 	close(fd[1]);
 	waitpid(pid_left, &status_left, 0);
+	cleanup_heredoc_fds(d->root);
 	waitpid(pid_right, &status_right, 0);
+	cleanup_heredoc_fds(d->root);
 	if (WIFEXITED(status_right))
 		g_data->exit_status = WEXITSTATUS(status_right);
 	else if (WIFSIGNALED(status_right))
@@ -156,6 +182,7 @@ int	execute_logical(t_data *d)
 		}
 	}
 	d->root = saved;
+	cleanup_heredoc_fds(d->root);
 	return (g_data->exit_status = status);
 }
 
@@ -170,6 +197,7 @@ int	execute_semicolon(t_data *d)
 	d->root = saved->reader;
 	status = execute(d);
 	d->root = saved;
+	cleanup_heredoc_fds(d->root);
 	return (g_data->exit_status = status);
 }
 
@@ -177,6 +205,7 @@ int	handle_redirections(t_node *cmd)
 {
 	int	fd;
 	int	i;
+	int	j;
 
 	i = 0;
 	if ((cmd->redirs == NULL && cmd->redir_count > 0))
@@ -200,6 +229,16 @@ int	handle_redirections(t_node *cmd)
 		if (fd < 0)
 		{
 			perror(cmd->redirs[i].filename);
+			j = 0;
+			while (j <= i)
+			{
+				if (cmd->redirs[j].type == HEREDOC && cmd->redirs[j].fd >= 0)
+				{
+					close(cmd->redirs[j].fd);
+					cmd->redirs[j].fd = -1;
+				}
+				j++;
+			}
 			if (errno == ENOENT)
 				return (g_data->exit_status = 1);
 			if (errno == EACCES)
@@ -211,6 +250,8 @@ int	handle_redirections(t_node *cmd)
 			dup2(fd, STDIN_FILENO);
 		else
 			dup2(fd, STDOUT_FILENO);
+		if (cmd->redirs[i].type == HEREDOC)
+			cmd->redirs[i].fd = -1;
 		close(fd);
 		i++;
 	}

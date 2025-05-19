@@ -11,9 +11,6 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 
 char	*handle_cd_path(t_data *d)
 {
@@ -60,13 +57,24 @@ char	*handle_cd_path(t_data *d)
 		home = get_env_value(d->env_list, "HOME");
 		if (!home)
 		{
-			ft_printf("cd: HOME not set");
+			ft_putendl_fd("cd: HOME not set", 2);
 			g_data->exit_status = 1;
 			return (NULL);
 		}
 		suffix = d->root->args[1] + 1;
 		expanded = ft_strjoin(home, suffix);
 		return (expanded);
+	}
+	if ((ft_strcmp(d->root->args[1], "--") == 0))
+	{
+		home = get_env_value(d->env_list, "HOME");
+		if (!home)
+		{
+			ft_printf("cd: HOME not set");
+			g_data->exit_status = 1;
+			return (NULL);
+		}
+		return (ft_strdup(home));
 	}
 	return (ft_strdup(d->root->args[1]));
 }

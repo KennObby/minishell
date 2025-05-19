@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
+#include <stdio.h>
 
 t_node	*create_leaf(char **args)
 {
@@ -47,5 +48,19 @@ t_node	*create_node(t_type type, t_node *left, t_node *right)
 	node->reader = right;
 	node->redirs = NULL;
 	node->redir_count = 0;
+	return (node);
+}
+
+t_node	*create_empty_node(void)
+{
+	t_node	*node;
+
+	node = ft_calloc(1, sizeof(t_node));
+	if (!node)
+		return (NULL);
+	node->type = CMD;
+	node->args = NULL;
+	node->redir_count = 0;
+	node->redirs = NULL;
 	return (node);
 }

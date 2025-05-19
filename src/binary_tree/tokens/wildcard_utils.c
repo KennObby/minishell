@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
+#include <stdlib.h>
 
 bool	match_pattern(const char *str, const char *pattern)
 {
@@ -82,17 +83,14 @@ char	**list_to_args_array(t_list *list)
 	int		i;
 
 	size = ft_lstsize(list);
-	if (size == 0)
-	{
-		args = malloc(sizeof(char *) * 1);
-		if (!args)
-			return (NULL);
-		args[1] = NULL;
-		return (args);
-	}
 	args = malloc(sizeof(char *) * (size + 1));
 	if (!args)
 		return (NULL);
+	if (size == 0)
+	{
+		args[0] = NULL;
+		return (args);
+	}
 	tmp = list;
 	i = 0;
 	while (tmp)

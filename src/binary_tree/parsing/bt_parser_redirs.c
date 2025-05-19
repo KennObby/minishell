@@ -11,6 +11,12 @@
 /* ************************************************************************** */
 
 #include "../../../inc/minishell.h"
+#include <stdlib.h>
+
+int	redir_is_quoted(t_redir *redir)
+{
+	return (redir && redir->is_quoted);
+}
 
 int	add_redirect(t_parser *parser, t_node *cmd_node, t_redir redir)
 {
@@ -30,13 +36,21 @@ int	add_redirect(t_parser *parser, t_node *cmd_node, t_redir redir)
 	return (1);
 }
 
-int	parse_redirects(t_parser *parser, t_node *cmd_node)
+int	parse_redirects(t_parser *parser, t_node **cmd_node)
 {
 	t_redir		redir;
+	char		*expanded;
 
+	ft_bzero(&redir, sizeof(t_redir));
 	while (is_redirection(peek(parser)))
 	{
-		redir.type = parser->tokens[parser->pos - 1].type;
+		if (!(*cmd_node))
+		{
+			*cmd_node = create_empty_node();
+			if (!*cmd_node)
+				return (0);
+		}
+		redir.type = parser->tokens[parser->pos].type;
 		parser->pos++;
 		if (parser->pos >= MAX_TOKENS || peek(parser) != WORD)
 		{
@@ -44,11 +58,17 @@ int	parse_redirects(t_parser *parser, t_node *cmd_node)
 			parser->pos = MAX_TOKENS;
 			return (0);
 		}
+		printf("[PARSER] Raw heredoc delimiter: '%s' (quoted: %d)\n",
+			parser->tokens[parser->pos].value, parser->tokens[parser->pos].quoted);
 		redir.filename = ft_strdup(parser->tokens[parser->pos].value);
 		redir.fd = -1;
 		redir.is_quoted = parser->tokens[parser->pos].quoted;
 		parser->pos++;
-		if (!add_redirect(parser, cmd_node, redir))
+		expanded = expand_argument(redir.filename, &g_data->env_list);
+		printf("[PARSER] Expanded heredoc delimiter: '%s'\n", expanded);
+		free(redir.filename);
+		redir.filename = expanded;
+		if (!add_redirect(parser, *cmd_node, redir))
 			return (free(redir.filename), 0);
 	}
 	return (1);
